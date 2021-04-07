@@ -1,26 +1,3 @@
-@push('pack')
-    <style>
-        .breadcumb a::after {
-            content: "chevron_right";
-            font-family: 'Material Icons';
-            font-weight: normal;
-            font-style: normal;
-            font-size: 20px;
-            line-height: 1;
-            letter-spacing: normal;
-            text-transform: none;
-            display: inline-block;
-            white-space: nowrap;
-            word-wrap: normal;
-            direction: ltr;
-            -webkit-font-feature-settings: 'liga';
-            -webkit-font-smoothing: antialiased;
-            align-items: center;
-            padding: 0px 2px;
-        }
-
-    </style>
-@endpush
 <section>
     {{-- header --}}
     <div class="flex gap-14">

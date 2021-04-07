@@ -3,10 +3,15 @@
 use App\Exports\KolektibilitasExport;
 use App\Http\Livewire\Dashboard;
 use App\Http\Livewire\Master\Kolektibilitas;
+use App\Http\Livewire\Master\Nasabah;
+use App\Http\Livewire\Master\Pegawai;
+use App\Http\Livewire\Master\Pendidikan;
+use App\Http\Livewire\Master\Penghasilan;
+use App\Http\Livewire\Master\Produk;
+use App\Http\Livewire\Master\Profesi;
+use App\Http\Livewire\Master\TimPemasaran;
+use App\Http\Livewire\Master\Wilayah;
 use App\Models\HistoriKolektibilitas;
-use App\Models\Nasabah as ModelsNasabah;
-use App\Models\TeamPemasaran;
-use App\Models\User;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Route;
 
@@ -37,7 +42,7 @@ Route::get('/test', function () {
 
 
 
-    dd(DB::query("select * from users")->get());
+    
 });
 
 
@@ -51,6 +56,15 @@ Route::get('dashboard', Dashboard::class)->name('dashboard');
 //page master timpa sini
 Route::prefix('master')->name('master.')->group( function () {
     Route::get('kolektibilitas', Kolektibilitas::class)->name('kolektibilitas');
+    Route::get('nasabah', Nasabah::class)->name('nasabah');
+    Route::get('pendidikan', Pendidikan::class)->name('pendidikan');
+    Route::get('pegawai', Pegawai::class)->name('pegawai');
+    Route::get('penghasilan', Penghasilan::class)->name('penghasilan');
+    Route::get('profesi', Profesi::class)->name('profesi');
+    Route::get('produk', Produk::class)->name('produk');
+    Route::get('tim_pemasaran', TimPemasaran::class)->name('tim_pemasaran');
+    Route::get('wilayah', Wilayah::class)->name('wilayah');
+
 });
 
 //page laporan timpa sini

@@ -88,55 +88,55 @@
                                 </li>
                             </a>
 
-                            <a href="{{ url('/') }}">
+                            <a href="{{ route('master.nasabah') }}">
                                 <li class="menu">
                                     <i class="material-icons flex items-center">donut_large</i>
                                     <span class="flex items-center">Daftar Nasabah</span>
                                 </li>
                             </a>
 
-                            <a href="{{ url('/') }}">
+                            <a href="{{ route('master.pendidikan') }}">
                                 <li class="menu">
                                     <i class="material-icons flex items-center">donut_large</i>
                                     <span class="flex items-center">Daftar Pendidikan</span>
                                 </li>
                             </a>
 
-                            <a href="{{ url('/') }}">
+                            <a href="{{ route('master.pegawai') }}">
                                 <li class="menu">
                                     <i class="material-icons flex items-center">donut_large</i>
                                     <span class="flex items-center">Daftar Pegawai</span>
                                 </li>
                             </a>
 
-                            <a href="{{ url('/') }}">
+                            <a href="{{ route('master.penghasilan') }}">
                                 <li class="menu">
                                     <i class="material-icons flex items-center">donut_large</i>
                                     <span class="flex items-center">Daftar Penghasilan</span>
                                 </li>
                             </a>
 
-                            <a href="{{ url('/') }}">
+                            <a href="{{ route('master.profesi') }}">
                                 <li class="menu">
                                     <i class="material-icons flex items-center">donut_large</i>
                                     <span class="flex items-center">Daftar Profesi</span>
                                 </li>
                             </a>
 
-                            <a href="{{ url('/') }}">
+                            <a href="{{ route('master.produk') }}">
                                 <li class="menu">
                                     <i class="material-icons flex items-center">donut_large</i>
                                     <span class="flex items-center">Daftar Produk</span>
                                 </li>
                             </a>
 
-                            <a href="{{ url('/') }}">
+                            <a href="{{ route('master.tim_pemasaran') }}">
                                 <li class="menu">
                                     <i class="material-icons flex items-center">donut_large</i>
                                     <span class="flex items-center">Tim Pemasaran</span>
                                 </li>
                             </a>
-                            <a href="{{ url('/') }}">
+                            <a href="{{ route('master.wilayah') }}">
                                 <li class="menu">
                                     <i class="material-icons flex items-center">donut_large</i>
                                     <span class="flex items-center">Daftar Wilayah</span>
