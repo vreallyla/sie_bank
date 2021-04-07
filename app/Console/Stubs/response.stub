@@ -1,0 +1,17 @@
+<?php
+
+namespace App\Http\Responses;
+
+class DummyClass
+{
+
+    /**
+     * @param  $request
+     * @return mixed
+     */
+    public function toResponse($request)
+    {
+  
+    }
+
+}
