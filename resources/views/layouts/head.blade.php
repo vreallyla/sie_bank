@@ -152,62 +152,53 @@
                             <span class="flex items-center">Laporan</span>
                         </div>
                         <ul class="sub-menu">
-                            <a href="{{ url('/') }}">
+                            <a href="{{ route('laporan.nasabah') }}">
                                 <li class="menu">
                                     <i class="material-icons flex items-center">donut_large</i>
-                                    <span class="flex items-center">Daftar Kolektibilitas</span>
+                                    <span class="flex items-center">Nasabah</span>
+                                </li>
+                            </a>
+                            <a href="{{ route('laporan.kolektabilitas_nasabah') }}">
+                                <li class="menu">
+                                    <i class="material-icons flex items-center">donut_large</i>
+                                    <span class="flex items-center">Kolektibilitas Nasabah</span>
                                 </li>
                             </a>
 
-                            <a href="{{ url('/') }}">
+                            <a href="{{ route('laporan.pendidikan_nasabah') }}">
                                 <li class="menu">
                                     <i class="material-icons flex items-center">donut_large</i>
-                                    <span class="flex items-center">Daftar Nasabah</span>
+                                    <span class="flex items-center">Pendidikan Nasabah</span>
                                 </li>
                             </a>
 
-                            <a href="{{ url('/') }}">
+                            <a href="{{ route('laporan.penghasilan_nasabah') }}">
                                 <li class="menu">
                                     <i class="material-icons flex items-center">donut_large</i>
-                                    <span class="flex items-center">Daftar Pendidikan</span>
+                                    <span class="flex items-center">Penghasilan Nasabah</span>
                                 </li>
                             </a>
 
-                            <a href="{{ url('/') }}">
+                            <a href="{{ route('laporan.profesi_nasabah') }}">
                                 <li class="menu">
                                     <i class="material-icons flex items-center">donut_large</i>
-                                    <span class="flex items-center">Daftar Pegawai</span>
+                                    <span class="flex items-center">Profesi Nasabah</span>
                                 </li>
                             </a>
 
-                            <a href="{{ url('/') }}">
+                            <a href="{{ route('laporan.pemakaian_produk') }}">
                                 <li class="menu">
                                     <i class="material-icons flex items-center">donut_large</i>
-                                    <span class="flex items-center">Daftar Penghasilan</span>
+                                    <span class="flex items-center">Pemakaian Produk</span>
                                 </li>
                             </a>
 
-                            <a href="{{ url('/') }}">
+                            <a href="{{ route('laporan.kinerja_pemasaran') }}">
                                 <li class="menu">
                                     <i class="material-icons flex items-center">donut_large</i>
-                                    <span class="flex items-center">Daftar Profesi</span>
+                                    <span class="flex items-center">Kinerja Pemasaran</span>
                                 </li>
                             </a>
-
-                            <a href="{{ url('/') }}">
-                                <li class="menu">
-                                    <i class="material-icons flex items-center">donut_large</i>
-                                    <span class="flex items-center">Daftar Produk</span>
-                                </li>
-                            </a>
-
-                            <a href="{{ url('/') }}">
-                                <li class="menu">
-                                    <i class="material-icons flex items-center">donut_large</i>
-                                    <span class="flex items-center">Tim Pemasaran</span>
-                                </li>
-                            </a>
-
 
                         </ul>
                     </li>

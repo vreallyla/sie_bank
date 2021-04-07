@@ -2,6 +2,12 @@
 
 use App\Exports\KolektibilitasExport;
 use App\Http\Livewire\Dashboard;
+use App\Http\Livewire\Laporan\KolektabilitasNasabah;
+use App\Http\Livewire\Laporan\Nasabah as LaporanNasabah;
+use App\Http\Livewire\Laporan\PemakaianProduk;
+use App\Http\Livewire\Laporan\PendidikanNasabah;
+use App\Http\Livewire\Laporan\PenghasilanNasabah;
+use App\Http\Livewire\Laporan\ProfesiNasabah;
 use App\Http\Livewire\Master\Kolektibilitas;
 use App\Http\Livewire\Master\Nasabah;
 use App\Http\Livewire\Master\Pegawai;
@@ -68,5 +74,13 @@ Route::prefix('master')->name('master.')->group( function () {
 });
 
 //page laporan timpa sini
-Route::group(['name' => 'laporan.', 'namespace' => 'Laporan', 'prefix' => 'laporan'], function () {
+Route::prefix('laporan')->name('laporan.')->group( function () {
+    Route::get('nasabah', LaporanNasabah::class)->name('nasabah');
+    Route::get('kolektabilitas_nasabah', KolektabilitasNasabah::class)->name('kolektabilitas_nasabah');
+    Route::get('pendidikan_nasabah', PendidikanNasabah::class)->name('pendidikan_nasabah');
+    Route::get('penghasilan_nasabah', PenghasilanNasabah::class)->name('penghasilan_nasabah');
+    Route::get('profesi_nasabah', ProfesiNasabah::class)->name('profesi_nasabah');
+    Route::get('pemakaian_produk', PemakaianProduk::class)->name('pemakaian_produk');
+    Route::get('kinerja_pemasaran', PemakaianProduk::class)->name('kinerja_pemasaran');
+
 });
