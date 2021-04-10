@@ -1,5 +1,6 @@
 <?php
 
+use App\Charts\NasabahChart;
 use App\Exports\KolektibilitasExport;
 use App\Http\Livewire\Dashboard;
 use App\Http\Livewire\Laporan\KolektabilitasNasabah;
@@ -17,7 +18,9 @@ use App\Http\Livewire\Master\Produk;
 use App\Http\Livewire\Master\Profesi;
 use App\Http\Livewire\Master\TimPemasaran;
 use App\Http\Livewire\Master\Wilayah;
+use App\Http\Livewire\WanSpeedTests;
 use App\Models\HistoriKolektibilitas;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Route;
 
@@ -25,9 +28,17 @@ Route::get('/', function () {
     return view('welcome');
 });
 
+Route::get('master/chart', WanSpeedTests::class);
+
 Route::get('/test', function () {
 
-    
+    $labels=['1','2','3','4','5','6','7'];
+    $datasets=new Collection([
+        [4,5,8,5,2,9,6],
+        [3,4,5,2,1,7,3]
+    ]);
+
+    dd((new NasabahChart($labels, $datasets)));
     $range = 'years';
     $pickYears = 2021;
     $opsData = 'team_leader';

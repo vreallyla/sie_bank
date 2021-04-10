@@ -75,7 +75,7 @@
                     </a>
 
                     <li class="flex-col">
-                        <div @click="showSub = 'master'" :class="showSub === 'master' ? 'active' : ''"
+                        <div @click="showSub = showSub=='master'?'':'master'" :class="showSub === 'master' ? 'active' : ''"
                             class="menu with-sub flex gap-2">
                             <i class="material-icons flex items-center">layers</i>
                             <span class="flex items-center">Data Master</span>
@@ -146,7 +146,7 @@
                     </li>
 
                     <li class="flex-col">
-                        <div @click="showSub = 'laporan'" :class="showSub === 'laporan' ? 'active' : ''"
+                        <div @click="showSub = showSub=='laporan' ?'':'laporan'" :class="showSub === 'laporan' ? 'active' : ''"
                             class="menu with-sub flex gap-2">
                             <i class="material-icons flex items-center">receipt</i>
                             <span class="flex items-center">Laporan</span>
@@ -231,8 +231,12 @@
             </main>
         </div>
     </div>
+    @include('addons.custom-chart')
+
     @livewireScripts
     @stack('scripts')
+
+    @stack('modals')
     <script>
         document.addEventListener("DOMContentLoaded", function() {
             console.log(window.location.pathname);
@@ -249,6 +253,7 @@
         });
 
     </script>
+    
 </body>
 
 </html>

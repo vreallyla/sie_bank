@@ -96,4 +96,31 @@
     .error{
         @apply text-red-600;
     }
+
+    /* radio */
+     /* radio */
+     input[type="radio"].option_round{
+        @apply hidden;
+    }
+
+    input[type="radio"].option_round + span{
+        @apply capitalize py-1 px-2 flex items-center bg-gray-600 text-white justify-center mt-1 cursor-pointer hover:bg-gray-700
+            border-r border-gray-900;
+            min-width: 4rem;
+    }
+
+    input[type="radio"].option_round:checked + span{
+        @apply bg-indigo-600;
+    }
+
+    input[type="radio"].option_round.first + span{
+        border-top-left-radius: 0.5rem;
+        border-bottom-left-radius: 0.5rem;
+    }
+
+    input[type="radio"].option_round.last + span{
+        border-top-right-radius: 0.5rem;
+        border-bottom-right-radius: 0.5rem;
+        border-style: none;
+    }
   }
