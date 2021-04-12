@@ -17,7 +17,7 @@ class Kolektibilitas extends Component
     public $nama;
     public $singkatan;
     public $dataId;
-    public $rowPages=2;
+    public $rowPages=10;
     public $search;
     
     //event class
