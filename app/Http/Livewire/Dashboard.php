@@ -44,16 +44,38 @@ class Dashboard extends Component
     public int $pickMonth; //filled on monthOrYears
     public string $opsData = OP_WILAYAH; //when $scopeRegions=true changes Next
     public ?string $pickRegion = null; // by id wilayah table
+    public bool $chartView=false;
 
     //params function
-    public bool $modalChartFormVisible = true;
+    public bool $modalChartFormVisible = false;
 
 
     //pointer
     public $collectibilityPointer;
     public array $resultPointer;
 
+    public function changeChar()
+    {
+        dd($this->pickYears);
+        // dd($this->getChartLabels());
+    }
 
+    private function getChartLabels()
+    {
+        $pick=$this->scopeRegions;
+        $result=[];
+
+        if($pick){
+
+        }else{
+            $this->monthOrYear();
+            $kond=$this->rangeData==RANGE_MONTHS;
+            $result=$kond?$this->monthList:$this->yearList;
+            $result=collect($result)->pluck($kond?'months_text':'years');
+        }
+
+        return $result;
+    }
 
     /**
      * Shows the form modal
@@ -121,7 +143,7 @@ class Dashboard extends Component
         // count every classification
         $finalQuery = DB::table(DB::raw("({$sub->toSql()}) as sub"))
             ->mergeBindings($sub->getQuery()) // you need to get underlying Query Builder
-            ->groupBy('label', 'uid', 'urutan')
+            ->groupBy('label', 'uid', 'urutan','kolektibilitas.nama')
             ->selectRaw('uid as id,label,kolektibilitas.nama as kolektibilitas,count(uid) as jumlah')
             ->join('kolektibilitas', 'sub.uid', '=', 'kolektibilitas.id')
             ->orderBy('urutan')
@@ -131,7 +153,7 @@ class Dashboard extends Component
         // count into one of clasifications
         $allInQuery = DB::table(DB::raw("({$sub->toSql()}) as sub"))
             ->mergeBindings($sub->getQuery()) // you need to get underlying Query Builder
-            ->groupBy('label', 'urutan')
+            ->groupBy('label', 'urutan','kolektibilitas.nama')
             ->selectRaw('label,\'Semua\' as kolektibilitas,count(uid) as jumlah')
             ->join('kolektibilitas', 'sub.uid', '=', 'kolektibilitas.id')
             ->orderBy('urutan', 'desc')

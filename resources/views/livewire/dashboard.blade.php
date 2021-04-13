@@ -241,7 +241,7 @@
                         <span class="text-gray-400 text-xs">Jarak Grafik</span>
                         <div class="flex" x-data="{monthsOrYears:'{{ $rangeData }}'}">
                             <label @click="monthsOrYears='{{ $rangeList[0] }}'">
-                                <input {{ $rangeList[0] == $rangeData ? 'checked="true"' : '' }} type="radio"
+                                <input wire:model="rangeData" {{ $rangeList[0] == $rangeData ? 'checked="true"' : '' }} type="radio"
                                     value="{{ $rangeList[0] }}" name="range" wire:key="range_{{ $rangeList[0] }}"
                                     class="first option_round">
                                 <span>{{ $rangeList[0] }}</span>
@@ -251,7 +251,8 @@
 
                                 <x-jet-dropdown align="left" width="22" contentData="selectYears:{{ $pickYears }}"
                                     contentClasses="py-1 bg-white text-gray-400 bg-gray-900 border-gray-400 border-2">
-                                    <x-slot name="trigger">
+                                    <x-slot name="trigger"> 
+                                        <input wire:model.debounce.800ms="pickYears" type="text" name="select_years" x-model="selectYears">
 
 
                                         <span x-text="selectYears"
@@ -264,7 +265,7 @@
                                     </x-slot>
                                     <x-slot name="content">
                                         <div>
-                                            <input type="hidden" name="select_years" x-model="selectYears">
+                                            
                                             <ul class="flex flex-col w-22">
                                                 @foreach ($yearList as $item)
                                                     <li :class="{'bg-indigo-600 text-white': selectYears=== {{ $item->years }}}"
@@ -281,7 +282,7 @@
                             </div>
 
                             <label @click="monthsOrYears='{{ $rangeList[1] }}'">
-                                <input {{ $rangeList[1] == $rangeData ? 'checked="true"' : '' }} type="radio"
+                                <input wire:model="rangeData" {{ $rangeList[1] == $rangeData ? 'checked="true"' : '' }} type="radio"
                                     value="{{ $rangeList[1] }}" name="range" wire:key="range_{{ $rangeList[1] }}"
                                     class="last option_round">
                                 <span>{{ $rangeList[1] }}</span>
@@ -294,12 +295,12 @@
 
                             <label @click="isRegions=false">
 
-                                <input {{ !$scopeRegions ? 'checked="true"' : '' }} type="radio" value="0"
+                                <input wire:model="scopeRegions" {{ !$scopeRegions ? 'checked="true"' : '' }} type="radio" value="0"
                                     name="scope" wire:key="scope_1" class="first option_round">
                                 <span>Semua</span>
                             </label>
-                            <label @click="isRegions=true">
-                                <input {{ $scopeRegions ? 'checked="true"' : '' }} type="radio" value="1"
+                            <label @click="isRegions=true;console.log(document.querySelector('#reset_compare').children[0].click())">
+                                <input wire:model="scopeRegions" {{ $scopeRegions ? 'checked="true"' : '' }} type="radio" value="1"
                                     name="scope" wire:key="scope_0" class="last option_round">
                                 <span>Wilayah</span>
                             </label>
@@ -312,13 +313,13 @@
                 <div class="pt-4">
                     <span class="text-gray-400 text-xs">Perbandingan Data</span>
                     <div class="flex">
-                        <label @click="setCompare=false">
+                        <label id="reset_compare" wire:model="opsData" @click="setCompare=false">
                             <input type="radio" value="0" name="compare_options" wire:key="comp__"
                                 class="first option_round">
                             <span>None</span>
                         </label>
                         @foreach ($opsList as $i => $item)
-                            <label @click="setCompare=true">
+                            <label {{ $item==='wilayah_id'? 'x-show=!isRegions' :'' }} wire:model="opsData" @click="setCompare=true">
                                 <input {{ $item == $opsData ? 'checked="true"' : '' }} type="radio"
                                     value="{{ $item }}" name="compare_options"
                                     wire:key="comp_{{ $i }}" class="{!! $i < count($opsList) - 1 ? '' : 'last' !!} option_round">
@@ -335,12 +336,12 @@
                     <span class="text-gray-400 text-xs">Jenis Grafik Perbandingan</span>
                     <div class="flex">
                         <label>
-                            <input type="radio" value="0" name="chart_type" wire:key="chart_type_0"
+                            <input wire:model="chartView" type="radio" value="0" name="chart_type" wire:key="chart_type_0"
                                 class="first option_round">
                             <span>Batang</span>
                         </label>
                         <label>
-                            <input type="radio" value="1" name="chart_type" wire:key="chart_type_1"
+                            <input wire:model="chartView" type="radio" value="1" name="chart_type" wire:key="chart_type_1"
                                 class="last option_round">
                             <span>Batang-Garis</span>
                         </label>
@@ -361,7 +362,7 @@
 
 
             <x-jet-button class="ml-2" wire:click="changeChar" wire:loading.attr="disabled">
-                {{ __('Buat') }}
+                {{ __('Atur') }}
                 </x-jet-danger-button>
 
 
