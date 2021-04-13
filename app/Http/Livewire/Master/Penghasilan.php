@@ -8,7 +8,9 @@ class Penghasilan extends Component
 {
     public function render()
     {
-        return view('livewire.master.penghasilan')
+        return view('livewire.master.penghasilan', [
+            'data' => $this->read(),
+        ])
         ->layout('layouts.head')
         ;
     }
