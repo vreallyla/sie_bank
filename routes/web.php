@@ -31,6 +31,7 @@ Route::get('/', function () {
 Route::get('master/chart', WanSpeedTests::class);
 
 Route::get('/test', function () {
+    
 
     $labels=['1','2','3','4','5','6','7'];
     $datasets=new Collection([

@@ -36,9 +36,10 @@ class NasabahSeeder extends Seeder
         $product_code = ['SC', 'GC', 'PC'];
 
         foreach (range(0, 1000) as $dt) {
+            $tahun = rand(2018, now()->format('Y'));
             $tanggal = rand(1, 28);
-            $bulan = rand(1, 12);
-            $tahun = rand(2018, 2021);
+            $bulan = rand(1, $tahun==now()->format('Y')?now()->format('m'):12);
+            
             $pick_produk = rand(1, (count($produk)));
             $kode_debitur = $product_code[$pick_produk - 1] . substr($tahun, 2) . str_pad($bulan, 2, '0', STR_PAD_LEFT);
             $wilayah_id=rand(1, (count($wilayah)));

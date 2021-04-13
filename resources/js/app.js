@@ -18,13 +18,16 @@ window.livewire.on("chartUpdate", (data) => {
         console.log(chart.data.datasets);
         console.log(element.chart.datasets);
         console.log(chart.data.labels);
-        
+        console.log(element);
         if(element.chart.datasets.data){
             chart.data.datasets[0]=element.chart.datasets;
         }else{
-            chart.data.datasets.forEach((dataset, key) => {
-                dataset = element.chart.datasets[key];
-            });
+        //     console.log('a');
+        //     console.log(chart.data.datasets);
+           
+                chart.data.datasets=element.chart.datasets;
+                
+            
         }
 
         chart.data.labels = element.chart.labels;
@@ -35,5 +38,5 @@ window.livewire.on("chartUpdate", (data) => {
         chart.data.datasets.foe
     }
 
-    console.log(window[data[key].id]);
+    
 });

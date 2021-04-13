@@ -55,22 +55,23 @@
             <div class="bg-gray-900 my-2 md:my-4 lg:my-6 px-6 py-3 rounded-md shadow">
                 <div class="mb-4 pb-1 flex">
                     <div class="w-screen flex items-center">
-                        <h4 class="text-base font-thin text-gray-400">Grafik Pertambahan Nasabah</h4>
+                        <h4 class="text-base font-thin text-gray-400">Grafik Pertambahan Nasabah {{$varValues['rangeData']=='bulan'?$varValues['pickYears']:''}}</h4>
                     </div>
                     <div class="w-full justify-end flex items-center cursor-pointer" wire:click="showChartModal">
                         <i class="rounded-l-md py-1 px-2 bg-indigo-700 material-icons pr-1 flex items-center text-white"
                             style="font-size: 16px;">filter_vintage</i>
                         <span
-                            class="rounded-r-md py-1 px-2 pl-0 bg-indigo-700 text-white font-thin text-xs items-center">Wilayah,
-                            Pertahun</span>
+                            class="rounded-r-md py-1 px-2 pl-0 bg-indigo-700 text-white font-thin text-xs items-center">{{$varValues['opsData']?ucwords($varValues['opsData']).',':""}}
+                            Per{{$varValues['rangeData']}}</span>
 
                     </div>
                 </div>
                 <div wire:ignore wire:key="id">
-                    @include('addons.charts.bar')
+                    @include('addons.charts.bar',['id'=>$chartBar['id'],'chart'=>$chartBar['chart']])
                 </div>
 
                 {{-- maks min nasabah --}}
+                @if($opsData)
                 <div class="grid grid-flow-row grid-cols-2 gap-2 md:gap-4 mt-2 pt-4 border-t-2 border-gray-700">
 
                     <div class="place-self-center">
@@ -79,9 +80,9 @@
                                 style="font-size: 1.75rem;line-height: 1rem;">arrow_drop_up</i>
                             <div class="value-compare flex self-center flex flex-col">
                                 <h4 class="text-green-400 text-xs">Nasabah tertinggi</h4>
-                                <h6 class="text-indigo-500 text-xl font-bold self-center">2000</h6>
+                                <h6 class="text-indigo-500 text-xl font-bold self-center">{{$varValues['max_bar']['jumlah']}}</h6>
 
-                                <h4 class="text-gray-400 text-sm self-center">Surabaya timur</h4>
+                                <h4 class="text-gray-400 text-sm self-center">{{$varValues['max_bar']['name']}}</h4>
                             </div>
                         </div>
                     </div>
@@ -93,13 +94,14 @@
                                 style="font-size: 1.75rem;line-height: 1rem;">arrow_drop_down</i>
                             <div class="value-compare flex self-center flex flex-col">
                                 <h4 class="text-red-400 text-xs">Nasabah Terendah</h4>
-                                <h6 class="text-indigo-500 text-xl font-bold self-center">1000</h6>
+                                <h6 class="text-indigo-500 text-xl font-bold self-center">{{$varValues['min_bar']['jumlah']}}</h6>
 
-                                <h4 class="text-gray-400 text-sm self-center">Surabaya barat</h4>
+                                <h4 class="text-gray-400 text-sm self-center">{{$varValues['min_bar']['name']}}</h4>
                             </div>
                         </div>
                     </div>
                 </div>
+                @endif
             </div>
 
         </div>
@@ -117,73 +119,41 @@
             </div>
 
             {{-- precentase berdasarkan opsi --}}
+            @if($varValues['opsData']||$scopeRegions)
             <div class="bg-gray-900 my-2 md:my-4 lg:my-6 px-6 py-3 rounded-md shadow">
                 <div class="mb-4 pb-1 flex">
                     <div class="w-max flex items-center">
-                        <h4 class="whitespace-nowrap text-base font-thin text-gray-400">Presentase Perwilayah</h4>
+                        <h4 class="whitespace-nowrap text-base font-thin text-gray-400">Presentase Per{{$varValues['opsData']}}</h4>
                     </div>
                     <div class="w-screen justify-end flex items-center">
                         <i class="rounded-l-md py-1 px-2 bg-indigo-700 material-icons pr-1 flex items-center text-white"
                             style="font-size: 16px;">date_range</i>
                         <span
-                            class="rounded-r-md py-1 px-2 pl-0 bg-indigo-700 text-white font-thin text-xs items-center">Tahun
-                            2021</span>
+                            class="rounded-r-md py-1 px-2 pl-0 bg-indigo-700 text-white font-thin text-xs items-center">{{ucwords($varValues['rangeData'])}}
+                            {{$varValues['opsData']=='tahun'?$varValues['pickYears']:$varValues['pickMonth']}}</span>
 
                     </div>
                 </div>
 
                 <div class="grid grid-flow-row grid-cols-2 gap-1 md:gap-2">
+                    @foreach ($varValues['pecent_list'] as $item)
+                        
                     <div class="relative">
-                        <span class="text-xs text-gray-400">Surabaya barat</span>
+                        <span class="text-xs text-gray-400">{{ucwords($item['name'])}}</span>
                         <div class="percent w-full relative">
                             <div class="w-3/4 relative bg-green">
                                 <div class="w-full h-2 rounded-full bg-gray-500"></div>
-                                <div class="top-0 absolute w-1/4 h-2 rounded-full bg-indigo-700"></div>
+                                <div class="top-0 absolute w-1/4 h-2 rounded-full bg-indigo-700" style="width: {{round($item['jumlah']*100/$varValues['total'])}}%"></div>
                             </div>
-                            <span class="absolute top-0 right-1 text-gray-400 text-xs" style="top:-2px">25%</span>
+                            <span class="absolute top-0 right-1 text-gray-400 text-xs" style="top:-2px">{{round($item['jumlah']*100/$varValues['total'])}}%</span>
 
                         </div>
 
                     </div>
+                    @endforeach
 
-                    <div class="relative">
-                        <span class="text-xs text-gray-400">Surabaya utara</span>
-                        <div class="percent w-full relative">
-                            <div class="w-3/4 relative bg-green">
-                                <div class="w-full h-2 rounded-full bg-gray-500"></div>
-                                <div class="top-0 absolute w-1/4 h-2 rounded-full bg-indigo-700"></div>
-                            </div>
-                            <span class="absolute top-0 right-1 text-gray-400 text-xs" style="top:-2px">25%</span>
 
-                        </div>
-
-                    </div>
-
-                    <div class="relative">
-                        <span class="text-xs text-gray-400">Surabaya timur</span>
-                        <div class="percent w-full relative">
-                            <div class="w-3/4 relative bg-green">
-                                <div class="w-full h-2 rounded-full bg-gray-500"></div>
-                                <div class="top-0 absolute w-1/4 h-2 rounded-full bg-indigo-700"></div>
-                            </div>
-                            <span class="absolute top-0 right-1 text-gray-400 text-xs" style="top:-2px">25%</span>
-
-                        </div>
-
-                    </div>
-
-                    <div class="relative">
-                        <span class="text-xs text-gray-400">Surabaya selatan</span>
-                        <div class="percent w-full relative">
-                            <div class="w-3/4 relative bg-green">
-                                <div class="w-full h-2 rounded-full bg-gray-500"></div>
-                                <div class="top-0 absolute w-1/4 h-2 rounded-full bg-indigo-700"></div>
-                            </div>
-                            <span class="absolute top-0 right-1 text-gray-400 text-xs" style="top:-2px">25%</span>
-
-                        </div>
-
-                    </div>
+                   
 
                 </div>
 
@@ -196,9 +166,9 @@
                                 style="font-size: 1.75rem;line-height: 1rem;">arrow_drop_up</i>
                             <div class="value-compare flex self-center flex flex-col">
                                 <h4 class="text-green-400 text-xs">Wilayah tertinggi</h4>
-                                <h6 class="text-indigo-500 text-xl font-bold self-center">2000</h6>
+                                <h6 class="text-indigo-500 text-xl font-bold self-center">{{$varValues['max_percent']['jumlah']}}</h6>
 
-                                <h4 class="text-gray-400 text-sm self-center">Surabaya timur</h4>
+                                <h4 class="text-gray-400 text-sm self-center">{{$varValues['max_percent']['name']}}</h4>
                             </div>
                         </div>
                     </div>
@@ -210,15 +180,16 @@
                                 style="font-size: 1.75rem;line-height: 1rem;">arrow_drop_down</i>
                             <div class="value-compare flex self-center flex flex-col">
                                 <h4 class="text-red-400 text-xs">Wilayah Terendah</h4>
-                                <h6 class="text-indigo-500 text-xl font-bold self-center">1000</h6>
+                                <h6 class="text-indigo-500 text-xl font-bold self-center">{{$varValues['min_percent']['jumlah']}}</h6>
 
-                                <h4 class="text-gray-400 text-sm self-center">Surabaya barat</h4>
+                                <h4 class="text-gray-400 text-sm self-center">{{$varValues['min_percent']['name']}}</h4>
                             </div>
                         </div>
                     </div>
                 </div>
 
             </div>
+            @endif
 
 
 
@@ -234,12 +205,12 @@
         </x-slot>
 
         <x-slot name="content">
-            <div x-data="{isRegions:false,setCompare:true}">
+            <div wire:ignore x-data="{isRegions:false,setCompare:true,monthsOrYears:'{{ $rangeData }}'}">
                 <div 
                     class="grid grid-flow-row grid-cols-1 md:grid-cols-2 gap-1">
                     <div x-show="!isRegions">
                         <span class="text-gray-400 text-xs">Jarak Grafik</span>
-                        <div class="flex" x-data="{monthsOrYears:'{{ $rangeData }}'}">
+                        <div class="flex">
                             <label @click="monthsOrYears='{{ $rangeList[0] }}'">
                                 <input wire:model="rangeData" {{ $rangeList[0] == $rangeData ? 'checked="true"' : '' }} type="radio"
                                     value="{{ $rangeList[0] }}" name="range" wire:key="range_{{ $rangeList[0] }}"
@@ -252,7 +223,7 @@
                                 <x-jet-dropdown align="left" width="22" contentData="selectYears:{{ $pickYears }}"
                                     contentClasses="py-1 bg-white text-gray-400 bg-gray-900 border-gray-400 border-2">
                                     <x-slot name="trigger"> 
-                                        <input wire:model.debounce.800ms="pickYears" type="text" name="select_years" x-model="selectYears">
+                                        
 
 
                                         <span x-text="selectYears"
@@ -265,12 +236,13 @@
                                     </x-slot>
                                     <x-slot name="content">
                                         <div>
-                                            
+                                            <input class="picky hidden" wire:model="pickYears" type="checkbox" name="select_years"
+                                        wire:key="picky" :value="selectYears">
                                             <ul class="flex flex-col w-22">
                                                 @foreach ($yearList as $item)
                                                     <li :class="{'bg-indigo-600 text-white': selectYears=== {{ $item->years }}}"
                                                         class="px-4 cursor-pointer hover:bg-gray-700"
-                                                        @click="selectYears={{ $item->years }}">
+                                                        @click="selectYears={{ $item->years }};document.querySelector('.picky').checked=false;setTimeout(function(){document.querySelector('.picky').click();},100)">
                                                         {{ $item->years }}
                                                     </li>
                                                 @endforeach
@@ -299,7 +271,7 @@
                                     name="scope" wire:key="scope_1" class="first option_round">
                                 <span>Semua</span>
                             </label>
-                            <label @click="isRegions=true;console.log(document.querySelector('#reset_compare').children[0].click())">
+                            <label @click="isRegions=true;document.querySelector('#reset_compare').children[0].click();">
                                 <input wire:model="scopeRegions" {{ $scopeRegions ? 'checked="true"' : '' }} type="radio" value="1"
                                     name="scope" wire:key="scope_0" class="last option_round">
                                 <span>Wilayah</span>
@@ -319,7 +291,7 @@
                             <span>None</span>
                         </label>
                         @foreach ($opsList as $i => $item)
-                            <label {{ $item==='wilayah_id'? 'x-show=!isRegions' :'' }} wire:model="opsData" @click="setCompare=true">
+                            <label {{ ($item==='wilayah_id'? 'x-show=!isRegions' :'') }} wire:model="opsData" @click="setCompare=true">
                                 <input {{ $item == $opsData ? 'checked="true"' : '' }} type="radio"
                                     value="{{ $item }}" name="compare_options"
                                     wire:key="comp_{{ $i }}" class="{!! $i < count($opsList) - 1 ? '' : 'last' !!} option_round">
@@ -332,7 +304,7 @@
                     </div>
                 </div>
 
-                <div x-show="setCompare" class="pt-4">
+                <div x-show="false" class="pt-4">
                     <span class="text-gray-400 text-xs">Jenis Grafik Perbandingan</span>
                     <div class="flex">
                         <label>
@@ -361,7 +333,7 @@
             </x-jet-secondary-button>
 
 
-            <x-jet-button class="ml-2" wire:click="changeChar" wire:loading.attr="disabled">
+            <x-jet-button class="ml-2" wire:click="chartChange" wire:loading.attr="disabled">
                 {{ __('Atur') }}
                 </x-jet-danger-button>
 
@@ -374,205 +346,6 @@
 @push('scripts')
 
 
-    {{-- grafik kolektibilitas --}}
-    <script>
-        var chartColors = {
-            red: 'rgb(255, 99, 132)',
-            orange: 'rgb(255, 159, 64)',
-            yellow: 'rgb(255, 205, 86)',
-            green: 'rgb(75, 192, 192)',
-            blue: 'rgb(54, 162, 235)',
-            purple: 'rgb(153, 102, 255)',
-            grey: 'rgb(231,233,237)'
-        };
-
-        var randomScalingFactor = function() {
-            return (Math.random() > 0.5 ? 1.0 : 1.0) * Math.round(Math.random() * 100);
-        };
-
-        // draws a rectangle with a rounded top
-        Chart.helpers.drawRoundedTopRectangle = function(ctx, x, y, width, height, radius) {
-            ctx.beginPath();
-            ctx.moveTo(x + radius, y);
-            // top right corner
-            ctx.lineTo(x + width - radius, y);
-            ctx.quadraticCurveTo(x + width, y, x + width, y + radius);
-            // bottom right	corner
-            ctx.lineTo(x + width, y + height);
-            // bottom left corner
-            ctx.lineTo(x, y + height);
-            // top left	
-            ctx.lineTo(x, y + radius);
-            ctx.quadraticCurveTo(x, y, x + radius, y);
-            ctx.closePath();
-        };
-
-        Chart.elements.RoundedTopRectangle = Chart.elements.Rectangle.extend({
-            draw: function() {
-                var ctx = this._chart.ctx;
-                var vm = this._view;
-                var left, right, top, bottom, signX, signY, borderSkipped;
-                var borderWidth = vm.borderWidth;
-
-                if (!vm.horizontal) {
-                    // bar
-                    left = vm.x - vm.width / 2;
-                    right = vm.x + vm.width / 2;
-                    top = vm.y;
-                    bottom = vm.base;
-                    signX = 1;
-                    signY = bottom > top ? 1 : -1;
-                    borderSkipped = vm.borderSkipped || 'bottom';
-                } else {
-                    // horizontal bar
-                    left = vm.base;
-                    right = vm.x;
-                    top = vm.y - vm.height / 2;
-                    bottom = vm.y + vm.height / 2;
-                    signX = right > left ? 1 : -1;
-                    signY = 1;
-                    borderSkipped = vm.borderSkipped || 'left';
-                }
-
-                // Canvas doesn't allow us to stroke inside the width so we can
-                // adjust the sizes to fit if we're setting a stroke on the line
-                if (borderWidth) {
-                    // borderWidth shold be less than bar width and bar height.
-                    var barSize = Math.min(Math.abs(left - right), Math.abs(top - bottom));
-                    borderWidth = borderWidth > barSize ? barSize : borderWidth;
-                    var halfStroke = borderWidth / 2;
-                    // Adjust borderWidth when bar top position is near vm.base(zero).
-                    var borderLeft = left + (borderSkipped !== 'left' ? halfStroke * signX : 0);
-                    var borderRight = right + (borderSkipped !== 'right' ? -halfStroke * signX : 0);
-                    var borderTop = top + (borderSkipped !== 'top' ? halfStroke * signY : 0);
-                    var borderBottom = bottom + (borderSkipped !== 'bottom' ? -halfStroke * signY : 0);
-                    // not become a vertical line?
-                    if (borderLeft !== borderRight) {
-                        top = borderTop;
-                        bottom = borderBottom;
-                    }
-                    // not become a horizontal line?
-                    if (borderTop !== borderBottom) {
-                        left = borderLeft;
-                        right = borderRight;
-                    }
-                }
-
-                // calculate the bar width and roundess
-                var barWidth = Math.abs(left - right);
-                var roundness = this._chart.config.options.barRoundness || 0.5;
-                var radius = barWidth * roundness * 0.5;
-
-                // keep track of the original top of the bar
-                var prevTop = top;
-
-                // move the top down so there is room to draw the rounded top
-                top = prevTop + radius;
-                var barRadius = top - prevTop;
-
-                ctx.beginPath();
-                ctx.fillStyle = vm.backgroundColor;
-                ctx.strokeStyle = vm.borderColor;
-                ctx.lineWidth = borderWidth;
-
-                // draw the rounded top rectangle
-                Chart.helpers.drawRoundedTopRectangle(ctx, left, (top - barRadius + 1), barWidth, bottom -
-                    prevTop, barRadius);
-
-                ctx.fill();
-                if (borderWidth) {
-                    ctx.stroke();
-                }
-
-                // restore the original top value so tooltips and scales still work
-                top = prevTop;
-            },
-        });
-
-        Chart.defaults.roundedBar = Chart.helpers.clone(Chart.defaults.bar);
-
-        Chart.controllers.roundedBar = Chart.controllers.bar.extend({
-            dataElementType: Chart.elements.RoundedTopRectangle
-        });
-
-        var ctx = document.getElementById("collectbility-bars").getContext("2d");
-        var myBar = new Chart(ctx, {
-            type: 'roundedBar',
-            data: {
-                labels: ['2016', '2017', '2018', '2019', '2020', '2021'],
-                datasets: [{
-                        label: 'Semua',
-                        backgroundColor: chartColors.blue,
-                        data: [
-                            randomScalingFactor(),
-                            randomScalingFactor(),
-                            randomScalingFactor(),
-                            randomScalingFactor(),
-                            randomScalingFactor(),
-                            randomScalingFactor(),
-                        ]
-                    }, {
-                        label: 'Surabaya barat',
-                        backgroundColor: chartColors.red,
-                        data: [
-                            randomScalingFactor(),
-                            randomScalingFactor(),
-                            randomScalingFactor(),
-                            randomScalingFactor(),
-                            randomScalingFactor(),
-                            randomScalingFactor(),
-                        ]
-                    }, {
-                        label: 'Surabaya timur',
-                        backgroundColor: chartColors.green,
-                        data: [
-                            randomScalingFactor(),
-                            randomScalingFactor(),
-                            randomScalingFactor(),
-                            randomScalingFactor(),
-                            randomScalingFactor(),
-                            randomScalingFactor(),
-                        ]
-                    }, {
-                        label: 'Surabaya selatan',
-                        backgroundColor: chartColors.yellow,
-                        data: [
-                            randomScalingFactor(),
-                            randomScalingFactor(),
-                            randomScalingFactor(),
-                            randomScalingFactor(),
-                            randomScalingFactor(),
-                            randomScalingFactor(),
-                        ]
-                    },
-                    {
-                        label: 'Surabaya utara',
-                        backgroundColor: chartColors.purple,
-                        data: [
-                            randomScalingFactor(),
-                            randomScalingFactor(),
-                            randomScalingFactor(),
-                            randomScalingFactor(),
-                            randomScalingFactor(),
-                            randomScalingFactor(),
-                        ]
-                    },
-
-
-
-                ]
-            },
-            options: {
-                responsive: true,
-                barRoundness: 1,
-                title: {
-                    display: false,
-                    text: "Chart.js - Bar Chart with Rounded Tops (drawRoundedTopRectangle Method)"
-                },
-            }
-        });
-
-    </script>
 @endpush
 
 @push('pack')
