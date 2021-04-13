@@ -37,7 +37,7 @@ class Wilayah extends Component
         return [
 
             'nama' => ['required', Rule::unique('wilayahs', 'nama')->ignore($this->dataId)],
-            'kacap_id' => ['required', Rule::exists('users', 'nama')],
+            'kacap_id' => ['required', Rule::exists('users', 'id')],
             'telp' => ['required', Rule::unique('wilayahs', 'telp')->ignore($this->dataId)],
             'alamat' => ['array', 'required'],
 
@@ -170,8 +170,9 @@ class Wilayah extends Component
         $search=$this->search;
         return ModelsWilayah::when($search,function($q)use($search){
             $q->where('nama','like',"%$search%");
-            $q->orWhere('min','like',"%$search%");
-            $q->orWhere('max','like',"%$search%");
+            $q->orWhere('kacap_id','like',"%$search%");
+            $q->orWhere('telp','like',"%$search%");
+            $q->orWhere('alamat','like',"%$search%");
         })
             ->paginate($this->rowPages);
     }
