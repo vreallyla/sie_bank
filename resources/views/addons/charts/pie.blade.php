@@ -23,7 +23,7 @@
             position: 'right',
             reverse: false,
             labels: {
-                fontColor: '#F3F4F6' //set your desired color
+                fontColor: '#9CA3AF' //set your desired color
             }
 
         },

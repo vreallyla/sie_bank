@@ -12,13 +12,14 @@ window.livewire.on("chartUpdate", (data) => {
     // chart.data.labels = labels;
 
     // chart.update();
+    console.log(data);
 
     data.forEach((element) => {
         let chart = window[element.id].chart;
-        console.log(chart.data.datasets);
-        console.log(element.chart.datasets);
-        console.log(chart.data.labels);
-        console.log(element);
+        // console.log(chart.data.datasets);
+        // console.log(element.chart.datasets);
+        // console.log(chart.data.labels);
+        // console.log(element);
         if(element.chart.datasets.data){
             chart.data.datasets[0]=element.chart.datasets;
         }else{

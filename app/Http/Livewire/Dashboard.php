@@ -9,6 +9,7 @@ use App\Models\Wilayah;
 use App\Traits\colorSet;
 use Carbon\Carbon;
 use Carbon\CarbonPeriod;
+use Exception;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 use Livewire\Component;
@@ -46,11 +47,12 @@ class Dashboard extends Component
     public ?int $pickYears; //filled on monthOrYears / getMonthAvailable
     public ?int $pickMonth; //filled on monthOrYears
     public string $opsData = OP_WILAYAH; //when $scopeRegions=true changes Next
-    public ?string $pickRegion = null; // by id wilayah table
+    public ?int $pickRegion = null; // by id wilayah table
     public bool $chartView = false;
 
     //params function
     public bool $modalChartFormVisible = false;
+    public bool $modalPercentageFormVisible=false;
 
 
     //pointer
@@ -64,6 +66,12 @@ class Dashboard extends Component
         $this->setChar();
 
         $this->emit('chartUpdate', [$this->chartBar]);
+    }
+
+    public function percetageChanged($ops)
+    {
+        $this->{$ops};
+        $this->collectibilitySet();
     }
 
     public function setChar()
@@ -93,11 +101,13 @@ class Dashboard extends Component
             $result = collect($result)->pluck($kond ? 'months_text' : 'years');
         }
 
+
         return $result;
     }
 
     private function firstChart($data = null, $index = 0)
     {
+
         $pick = $this->scopeRegions;
         $isCollectibility = $this->opsData == OP_KOLEKTIBILITAS;
         $result = [];
@@ -105,39 +115,66 @@ class Dashboard extends Component
         $opsData = $this->opsData;
 
 
+        //set sub query if query needed
+        if (!$pick) {
+            $sub = $this->rangeData == RANGE_MONTHS ?
+                $this->getMonthAvailable(true) : $this->getYearAvailable(true);
+        } else {
+            $sub = Wilayah::select('id');
+        }
+
 
         $isMonth = $this->rangeData == RANGE_MONTHS;
 
-        $result = Nasabah::when($isMonth && !$pick, function ($q) use ($pickYears) {
+        $result = Nasabah::when($isMonth && !$pick, function ($q) use ($pickYears, $sub) {
             // by all month
             $q->where(DB::raw('year(tgl_real)'), $pickYears)
-                ->groupByRaw('month(tgl_real)')
-                ->orderByRaw('month(tgl_real)');
+                ->rightJoin(
+                    DB::raw("(" . $sub->toSql() . ") b"),
+                    function ($join) use ($sub) {
+                        $join->on('b.months', '=', DB::raw('month(nasabahs.tgl_real)'))
+                            ->addBinding($sub->getBindings());
+                    }
+                )
+                ->groupByRaw('months,month(tgl_real)')
+                ->orderByRaw('months,month(tgl_real)');
         })
-            ->when(!$isMonth && !$pick, function ($q) use ($pickYears) {
+            ->when(!$isMonth && !$pick, function ($q) use ($pickYears, $sub) {
                 // by all years
 
                 $q
-                    ->groupByRaw('year(tgl_real)')
-                    ->orderByRaw('year(tgl_real)');
+                    ->rightJoin(
+                        DB::raw("(" . $sub->toSql() . ") b"),
+                        function ($join) use ($sub) {
+                            $join->on('b.years', '=', DB::raw('year(nasabahs.tgl_real)'))
+                                ->addBinding($sub->getBindings());
+                        }
+                    )
+                    ->groupByRaw('b.years,year(tgl_real)')
+                    ->orderByRaw('b.years,year(tgl_real)');
             })
-            ->when($pick, function ($q) use ($pickYears) {
+            ->when($pick, function ($q) use ($pickYears,$sub) {
                 // by regions
                 $q
-                    ->groupBy('wilayah_id')
-                    ->orderBy('wilayah_id');
+                    ->rightJoin(
+                        DB::raw("(" . $sub->toSql() . ") b"),
+                        function ($join) use ($sub) {
+                            $join->on('b.id', '=', 'wilayah_id')
+                                ->addBinding($sub->getBindings());
+                        }
+                    )
+                    ->groupByRaw('b.id,wilayah_id')
+                    ->orderByRaw('b.id,wilayah_id');
             })
             ->when($data, function ($q) use ($data, $opsData) {
-                $q->where($opsData, $data->kunci);
+                $q->selectRaw("sum(if(`$opsData`='$data->kunci',1,0)) as hasil");
             })
-            ->selectRaw('count(id) as hasil')
-            ->get()->pluck('hasil');
-
-
-
+            ->when(!$data, function ($q) {
+                $q->selectRaw('count(nasabahs.id) as hasil');
+            });
 
         return [
-            'data' => $result,
+            'data' => $result->get()->pluck('hasil'),
             'backgroundColor' => $this->colorList()[$index],
             'label' => $data ? $data->nama : ($pick ? 'Wilayah' : 'Semua'),
         ];
@@ -145,6 +182,7 @@ class Dashboard extends Component
 
     private function compareChart()
     {
+        // dd($this->firstChart());
         $opsData = $this->opsData;
         $chart[] = $this->firstChart();
         $pick = $this->scopeRegions;
@@ -181,6 +219,9 @@ class Dashboard extends Component
                 })
                 ->orderBy($opsData)
                 ->get();
+
+
+
 
             foreach ($loopData as $dt) {
                 $chart[] = $this->firstChart($dt, ($i > 23 ? 1 : $i));
@@ -250,6 +291,17 @@ class Dashboard extends Component
         $this->modalChartFormVisible = true;
     }
 
+    /**
+     * Shows the form modal
+     * of the create function.
+     *
+     * @return void
+     */
+    public function showPercentageModal()
+    {
+        $this->modalPercentageFormVisible = true;
+    }
+
 
     /**
      * first load page
@@ -295,66 +347,71 @@ class Dashboard extends Component
         //var ops
         $pickYears = $this->pickYears;
         $range = $this->rangeData;
+        $isMonth = $this->rangeData !== RANGE_YEARS;
+        $collectibilityData = Kolektibilitas::all();
+        $maxMonthOfLastYears = HistoriKolektibilitas::selectRaw('max(month(tgl_pembaruan)) as `max`')
+            ->whereRaw('YEAR(tgl_pembaruan)=' . now()->format('Y'))
+            ->get()[0]->max;
 
         //return
         $result = [];
-
-        // clasification queries
-        $sub = $this->clasificationCollectibilityHistories(OP_KOLEKTIBILITAS);
-
-        // count every classification
-        $finalQuery = [];
-        foreach(Kolektibilitas::all() as $fill){
-            $dt= DB::table(DB::raw("(".$sub->toSql().") as sub"))
-            ->mergeBindings($sub->getQuery()) // you need to get underlying Query Builder
-            ->groupBy('label', 'uid', 'urutan')
-            ->selectRaw('uid as id,label,kolektibilitas.nama as kolektibilitas,count(uid) as jumlah')
-            ->join('kolektibilitas', 'sub.uid', '=', 'kolektibilitas.id')
-            ->orderBy('urutan')
-            ->where('kolektibilitas.nama',$fill->nama)
-            ->get();
-            foreach($dt as $l){
-                $finalQuery[]=$l;
-            }
-        }
-       
+        $jumlahSemua = 0;
+        $dataSemua = [];
 
 
-        // count into one of clasifications
-        $allInQuery = DB::table(DB::raw("({$sub->toSql()}) as sub"))
-            ->mergeBindings($sub->getQuery()) // you need to get underlying Query Builder
-            ->groupBy('label', 'urutan')
-            ->selectRaw('label,\'Semua\' as kolektibilitas,count(uid) as jumlah')
-            ->join('kolektibilitas', 'sub.uid', '=', 'kolektibilitas.id')
-            ->orderBy('urutan', 'desc')
+
+        $finalQuery = DB::table(DB::raw('histori_kolektibilitas as a'))
+            ->join('kolektibilitas as b', 'b.id', 'a.kolektibilitas_id')
+            ->when($isMonth, function ($q) use ($pickYears) {
+                $q->selectRaw("DATE_FORMAT(tgl_pembaruan, '%M') as `label`,count(a.id) as jumlah,b.nama as kolektibilitas")
+                    ->whereRaw("year(tgl_pembaruan)=$pickYears")
+                    ->groupByRaw('kolektibilitas_id,month(tgl_pembaruan),DATE_FORMAT(tgl_pembaruan, "%M")')
+                    ->orderByRaw('kolektibilitas_id,month(tgl_pembaruan),DATE_FORMAT(tgl_pembaruan, "%M")');
+            })
+            ->when(!$isMonth, function ($q) use ($maxMonthOfLastYears) {
+                $q->selectRaw("year(tgl_pembaruan) as `label`,count(a.id) as jumlah,b.nama as kolektibilitas")
+                    ->where(function ($q) use ($maxMonthOfLastYears) {
+                        $q->where(function ($q) {
+                            $q->where(DB::raw('month(tgl_pembaruan)'), DB::raw('12'));
+                        })->orWhere(function ($q) use ($maxMonthOfLastYears) {
+                            $q->where(DB::raw('year(tgl_pembaruan)'), now()->format('Y'));
+                            $q->where(DB::raw('month(tgl_pembaruan)'), $maxMonthOfLastYears);
+                        });
+                    })
+                    ->groupByRaw('kolektibilitas_id,year(tgl_pembaruan)')
+                    ->orderByRaw('kolektibilitas_id,year(tgl_pembaruan)');
+            })
             ->get();
 
-
-        // biding all data
-        foreach ($allInQuery as $all) {
-            $finalQuery = collect($finalQuery)->prepend($all)->all();
-        }
-
-        
-
-        // data suite
         foreach (collect($finalQuery)->groupBy('kolektibilitas')->all() as $label => $dt) {
             $jumlahs = collect($dt)->pluck('jumlah')->all();
             $labels = collect($dt)->pluck('label')->all();
+            $jumlahSemua = $jumlahSemua + collect($jumlahs)->last();
+
+            foreach ($jumlahs as $i => $ls) {
+                $dataSemua[$i] = ($dataSemua[$i] ?? 0) + $ls;
+            }
 
             $result[] = [
                 'id' => \Str::snake($label),
                 'label' => ucwords($label),
-                // 'jumlah' => Nasabah::when(ucwords($label) !== 'Semua', function ($q) use ($dt) {
-                //     $q->where('kolektibilitas_id', $dt[0]->id);
-                // })->get()->count(),
-                'jumlah' => collect($jumlahs)->sum(),
+                'jumlah' => collect($jumlahs)->last(),
                 'chart' => (object)[
                     'labels' => $labels,
                     'datasets' => ['data' => $jumlahs]
                 ]
             ];
         }
+
+        $result = collect($result)->prepend([
+            'id' => 'semua',
+            'label' => ucwords('semua'),
+            'jumlah' => $jumlahSemua,
+            'chart' => (object)[
+                'labels' => $labels,
+                'datasets' => ['data' => $dataSemua]
+            ]
+        ])->all();
 
 
 
@@ -363,55 +420,13 @@ class Dashboard extends Component
     }
 
     /**
-     * query collectibility clasifications
-     *
-     * @param  mixed $opsData
-     * @return void
-     */
-    private function clasificationCollectibilityHistories($opsData)
-    {
-        //var ops
-        $pickYears = $this->pickYears;
-        $pickMonth=$this->pickMonth;
-        $range = $this->rangeData;
-
-        $sub = HistoriKolektibilitas::when($range == RANGE_MONTHS, function ($q) use ($pickYears, $opsData) {
-            $q->whereYear('tgl_pembaruan', $pickYears)
-                ->select(
-                    DB::raw("$opsData as uid"),
-                    DB::raw('DATE_FORMAT(tgl_pembaruan, "%M") as label'),
-                    DB::raw('month(tgl_pembaruan) as urutan')
-                );
-        })
-            ->when($range == RANGE_YEARS, function ($q) use ($opsData,$pickMonth) {
-                $q->where(function ($q) {
-                    $q->where(function ($q) {
-                        $q->where(DB::raw('month(tgl_pembaruan)'), DB::raw('12'));
-                    })->orWhere(function ($q) {
-                        $q->where(DB::raw('year(tgl_pembaruan)'), DB::raw('YEAR(CURDATE())'));
-                        $q->where(DB::raw('month(tgl_pembaruan)'), DB::raw('month(CURDATE())'));
-                    });
-                })
-                    ->select(
-                        DB::raw("$opsData as uid"),
-                        DB::raw('year(tgl_pembaruan) as label'),
-                        DB::raw('year(tgl_pembaruan) as urutan')
-                    );
-            });
-
-        return $sub;
-    }
-
-
-
-    /**
      * get region data for ops region
      *
      * @return void
      */
     private function getRegion()
     {
-        $this->regionList = Wilayah::all();
+        return Wilayah::all();
     }
 
     /**
@@ -419,16 +434,21 @@ class Dashboard extends Component
      *
      * @return void
      */
-    private function getMonthAvailable()
+    private function getMonthAvailable($query = false)
     {
         $pickYears = $this->pickYears = $this->pickYears ?? now()->format('Y');
 
 
-        $this->monthList = HistoriKolektibilitas::whereYear('tgl_pembaruan', $pickYears)
+        $result = HistoriKolektibilitas::whereYear('tgl_pembaruan', $pickYears)
             ->selectRaw('distinct month(tgl_pembaruan) as months, DATE_FORMAT(tgl_pembaruan, "%M") months_text')
 
-            ->orderByRaw('month(tgl_pembaruan)')
-            ->get();
+            ->orderByRaw('month(tgl_pembaruan)');
+
+        if (!$query) {
+            $this->monthList = $result->get();
+        } else {
+            return $result;
+        }
     }
 
     /**
@@ -436,15 +456,23 @@ class Dashboard extends Component
      *
      * @return void
      */
-    private function getYearAvailable()
+    private function getYearAvailable($query = false)
     {
 
         $sub = HistoriKolektibilitas::selectRaw('year(tgl_pembaruan) as tahun');
 
-        $this->yearList = DB::table(DB::raw("({$sub->toSql()}) as sub"))
+        $result = DB::table(DB::raw("({$sub->toSql()}) as sub"))
             ->mergeBindings($sub->getQuery())
-            ->selectRaw('distinct tahun as years, tahun as years_text')
-            ->get();
+
+            ->groupByRaw('sub.tahun')
+            ->selectRaw('distinct tahun as years, tahun as years_text');
+
+
+        if (!$query) {
+            $this->yearList = $result->get();
+        } else {
+            return $result;
+        }
     }
 
     /**
@@ -532,65 +560,77 @@ class Dashboard extends Component
         $result['min_bar'] =
             $result['max_bar'] =
             $result['min_percent'] =
-            $result['max_percent'] =['name' => 'anon', 'jumlah' => 0];
+            $result['max_percent'] = ['name' => 'anon', 'jumlah' => 0];
         $result['total'] = 0;
 
         $result['pecent_list'] = [];
-        if(!$this->scopeRegions){
-            $chose = $this->rangeData == RANGE_MONTHS ? $this->pickMonth-1 : $this->pickYears-2018;
-
-        }else{
-            $chose=0;
+        if (!$this->scopeRegions) {
+            $chose = $this->rangeData == RANGE_MONTHS ? $this->pickMonth - 1 : $this->pickYears - 2018;
+        } else {
+            $chose = $this->pickRegion - 1;
         }
 
 
-        if($chose>=count($this->chartBar['chart']->labels)){
-            $chose=0;
+        if ($chose >= count($this->chartBar['chart']->labels)) {
+            $chose = 0;
         }
-        
-        
-        $er=[];
-        foreach ($this->chartBar['chart']->datasets as $i => $item) {
-            $item = (object)$item;
-            $jumlah = collect($item->data)->sum();
-            $jumlah2=$item->data[$chose];
 
-            if ($i == 0) {
-                $result['total'] =  $item->data[$chose];
-            }
-            
-            $set =['name' => $item->label, 'jumlah' => $jumlah];
-            $set2 =['name' => $item->label, 'jumlah' => $item->data[$chose]];
-            $er[]=$set;
-            
 
-            if($i>0){
-            $result['pecent_list'][] = ['name' => $item->label, 'jumlah' => $item->data[$chose]];
+        $er = [];
+
+        try {
+            foreach ($this->chartBar['chart']->datasets as $i => $item) {
+
+
+                $item = (object)$item;
+                $jumlah = collect($item->data)->sum();
+
+                $jumlah2 = $item->data[$chose];
+
+
+
+
+
+
+                if ($i == 0) {
+                    $result['total'] =  $item->data[$chose];
+                }
+
+
+                $set = ['name' => $item->label, 'jumlah' => $jumlah];
+                $set2 = ['name' => $item->label, 'jumlah' => $item->data[$chose]];
+                $er[] = $set;
+
+
+
+                if ($i > 0) {
+                    $result['pecent_list'][] = ['name' => $item->label, 'jumlah' => $item->data[$chose]];
+                }
+
+                if ($i == 1) {
+                    $result['min_bar'] = $set;
+                    $result['max_bar'] = $set;
+
+                    $result['min_percent'] = $set2;
+                    $result['max_percent'] = $set2;
+                } elseif ($i > 0) {
+
+                    $result['min_bar'] = $result['min_bar']['jumlah'] == 0 || ($result['min_bar']['jumlah'] > $jumlah && $jumlah != 0) ? $set : $result['min_bar'];
+                    $result['max_bar'] = $result['max_bar']['jumlah'] > $jumlah ? $result['max_bar'] : $set;
+                    $result['min_percent'] = $result['min_percent']['jumlah'] == 0 || ($result['min_percent']['jumlah'] > $jumlah2 && $jumlah2 != 0) ? $set2 : $result['min_percent'];
+                    $result['max_percent'] = $result['max_percent']['jumlah'] > $jumlah2 ? $result['max_percent'] : $set2;
+                }
+
+                //    
 
             }
-            
-            if($i==1){
-                $result['min_bar'] =$set;
-                $result['max_bar'] = $set;
-
-                $result['min_percent'] =$set2;
-                $result['max_percent'] = $set2;
-            }
-            elseif ($i > 0) {
-                
-                    $result['min_bar'] =$result['min_bar']['jumlah']>$jumlah?$set:$result['min_bar'];
-                    $result['max_bar'] = $result['max_bar']['jumlah']>$jumlah?$result['max_bar'] :$set;
-                    $result['min_percent'] =$result['min_percent']['jumlah']>$jumlah2?$set2:$result['min_percent'];
-                    $result['max_percent'] = $result['max_percent']['jumlah']>$jumlah2?$result['max_percent'] :$set2;
-                
-            }
-           
-            
+        } catch (Exception $e) {
+            dd($e->getMessage());
         }
-        
-        
 
-        
+
+
+
 
         $this->varValues = new Collection($result);
     }
@@ -656,11 +696,11 @@ class Dashboard extends Component
         $opsData = explode('_', $this->opsData)[0];
 
         if ($pick == RANGE_MONTHS) {
-
             if (count($monthList = $this->monthList)) {
+
                 $currentOrBegins = $this->pickYears == now()->format('Y')
                     ? count($monthList) - 1 : 0;
-                $this->pickMonth = $monthList[$currentOrBegins]->months;
+                $this->pickMonth = $this->pickMonth ?? $monthList[$currentOrBegins]->months;
             } else {
                 $this->pickMonth = null;
             }
@@ -673,7 +713,8 @@ class Dashboard extends Component
         } else {
 
             if (count($yearList = $this->yearList)) {
-                $this->pickYears = $yearList[count($yearList) - 1]->years;
+
+                $this->pickYears = $this->pickYears ?? $yearList[0]->years;
             } else {
                 $this->pickYears = null;
             }
@@ -695,6 +736,11 @@ class Dashboard extends Component
 
     public function render()
     {
+        $regions=$this->getRegion();
+
+        $this->pickYears = $this->pickYears ?? now()->format('Y');
+        $this->pickRegion=$this->pickRegion ?? ($regions->count()?$regions[0]->id:null);
+
         $this->CustomerSet();
         $this->collectibilitySet();
         $this->pointerExecution();
@@ -719,7 +765,7 @@ class Dashboard extends Component
 
                 'weekList' => $this->getCalendar(),
                 'rangeList' => [RANGE_MONTHS, RANGE_YEARS],
-                'regionList' => $this->getRegion(),
+                'regionList' => $regions,
                 'opsList' => [
                     OP_WILAYAH,
                     OP_KOLEKTIBILITAS,
