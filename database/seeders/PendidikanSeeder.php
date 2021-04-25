@@ -29,7 +29,7 @@ class PendidikanSeeder extends Seeder
             ],
             [
                 'nama' => 'Sekolah Menengah Kejuruan',
-                'singkatan' => 'SMA',
+                'singkatan' => 'SMK',
             ],
             [
                 'nama' => 'Ahli Madya',

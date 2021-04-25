@@ -2,14 +2,35 @@
 
 namespace App\Http\Livewire\Laporan;
 
-use Livewire\Component;
+use App\Http\Livewire\Support\ReportComponent;
+use App\Models\Penghasilan;
 
-class PenghasilanNasabah extends Component
+class PenghasilanNasabah extends ReportComponent
 {
-    public function render()
+    public array $tableRelation=[
+        'tableName'=>'penghasilans',
+        'fk'=>'penghasilan_id',
+        'name'=>'nama'
+    ];
+
+    public function mount()
     {
-        return view('livewire.laporan.penghasilan-nasabah')
-        ->layout('layouts.head')
-        ;
+        $this->pickYears = now()->format('Y');
+        $this->setPieBarVars();
+    }
+
+    /**
+     * get region data for ops region
+     *
+     * @return void
+     */
+    protected function getRelationsData()
+    {
+        return Penghasilan::select('id', 'nama');
+    }
+
+    public function views()
+    {
+        return 'livewire.laporan.penghasilan-nasabah';
     }
 }

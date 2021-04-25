@@ -36,7 +36,7 @@
                         <i class="rounded-l-md py-1 px-2 bg-indigo-700 material-icons pr-1 flex items-center text-white"
                             style="font-size: 16px;">filter_vintage</i>
                         <span
-                            class="rounded-r-md py-1 px-2 pl-0 bg-indigo-700 text-white font-thin text-xs items-center">{{ $pickRegion ? ucwords(App\Models\Wilayah::find($pickRegion)->nama) . ',' : '' }}
+                            class="rounded-r-md py-1 px-2 pl-0 bg-indigo-700 text-white font-thin text-xs items-center">{{ $pickRelationId ? ucwords(App\Models\Wilayah::find($pickRelationId)->nama) . ',' : '' }}
                             Per{{  $opsRange }}</span>
 
                     </div>
@@ -89,7 +89,7 @@
             {{-- pie grafik kolektibilitas --}}
             <div wire:ignore class="my-2 md:my-4 lg:my-6 py-3 px-6 text-sm bg-gray-900 shadow rounded-md">
                 <div class="pb-1">
-                    <h4 class="text-base font-thin text-gray-400">Presentase {{$pickRegion?'Pertahun':'Wilayah'}}</h4>
+                    <h4 class="text-base font-thin text-gray-400">Presentase {{$pickRelationId?($opsRange=='tahun'?'Pertahun':'Perbulan'):'Wilayah'}}</h4>
                 </div>
                 <div class="w-full" wire:key="{{ $chartPie['id'] }}">
                     @include('addons.charts.pie',['id'=>$chartPie['id'],'chart'=>$chartPie['chart']])
@@ -100,7 +100,7 @@
      </article>
 
      {{-- Modal chart Form --}}
-    <x-jet-dialog-modal wire:model="modalChartFormVisible">
+    <x-jet-dialog-modal wire:key="modelChar" wire:model="modalChartFormVisible">
         <x-slot name="title">
             {{ __('Pengaturan Grafik Wilayah') }}
         </x-slot>
@@ -175,16 +175,16 @@
 
                         <label wire:click="chartChange" @click="isRegions=false">
 
-                            <input wire:model="pickRegion" {{ !$pickRegion ? 'checked="true"' : '' }}
+                            <input wire:model="pickRelationId" {{ !$pickRelationId ? 'checked="true"' : '' }}
                                 type="radio" value="0" name="scope" wire:key="scope_0" class="first option_round">
                             <span>Semua</span>
                         </label>
-                        @foreach ($regionList as $i=>$item)
+                        @foreach ($relationData as $i=>$item)
                         <label wire:click="chartChange"
                         {{-- @click="isRegions=true;document.querySelector('#reset_compare').children[0].click();" --}}
                         >
-                            <input wire:model="pickRegion"
-                                type="radio" value="{{$item->id}}" name="scope" wire:key="scope_{{$i}}" class="{{$i==$regionList->count()-1?'last':''}} option_round">
+                            <input wire:model="pickRelationId"
+                                type="radio" value="{{$item->id}}" name="scope" wire:key="scope_{{$i}}" class="{{$i==$relationData->count()-1?'last':''}} option_round">
                             <span>{{$item->nama}}</span>
                         </label>
                         @endforeach
@@ -202,7 +202,7 @@
 
         <x-slot name="footer">
 
-            <x-jet-secondary-button wire:click="$toggle('modalChartFormVisible')" wire:loading.attr="disabled">
+            <x-jet-secondary-button  wire:click="$toggle('modalChartFormVisible')" wire:loading.attr="disabled">
                 {{ __('Kembali') }}
             </x-jet-secondary-button>
 

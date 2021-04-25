@@ -2,14 +2,36 @@
 
 namespace App\Http\Livewire\Laporan;
 
-use Livewire\Component;
+use App\Http\Livewire\Support\ReportComponent;
+use App\Models\Pekerjaan;
 
-class ProfesiNasabah extends Component
+class ProfesiNasabah extends ReportComponent
 {
-    public function render()
+    public array $tableRelation=[
+        'tableName'=>'pekerjaans',
+        'fk'=>'pekerjaan_id',
+        'name'=>'nama'
+    ];
+
+    public function mount()
     {
-        return view('livewire.laporan.profesi-nasabah')
-        ->layout('layouts.head')
-        ;
+        $this->pickYears = now()->format('Y');
+        $this->setPieBarVars();
     }
+
+    /**
+     * get region data for ops region
+     *
+     * @return void
+     */
+    protected function getRelationsData()
+    {
+        return Pekerjaan::select('id', 'nama');
+    }
+
+    public function views()
+    {
+        return 'livewire.laporan.profesi-nasabah';
+    }
+
 }

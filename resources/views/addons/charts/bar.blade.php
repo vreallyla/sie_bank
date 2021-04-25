@@ -3,10 +3,12 @@
 {{-- grafik kolektibilitas --}}
 <script>
     const json_data{!! $id !!} = '{!! json_encode($chart->datasets) !!}';
+
+    @if(isset($other))
     let dataSlug = '{!! json_encode($other) !!}';
 
     dataSlug= JSON.parse(dataSlug);
-
+    @endif
 
 
 
