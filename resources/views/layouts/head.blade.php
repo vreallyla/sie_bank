@@ -155,7 +155,7 @@
                             <a href="{{ route('laporan.nasabah') }}">
                                 <li class="menu">
                                     <i class="material-icons flex items-center">donut_large</i>
-                                    <span class="flex items-center">Nasabah</span>
+                                    <span class="flex items-center">Wilayah Nasabah</span>
                                 </li>
                             </a>
                             <a href="{{ route('laporan.kolektabilitas_nasabah') }}">

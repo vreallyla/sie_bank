@@ -365,7 +365,7 @@ class Dashboard extends Component
             ->when($isMonth, function ($q) use ($pickYears) {
                 $q->selectRaw("DATE_FORMAT(tgl_pembaruan, '%M') as `label`,count(a.id) as jumlah,b.nama as kolektibilitas")
                     ->whereRaw("year(tgl_pembaruan)=$pickYears")
-                    ->groupByRaw('kolektibilitas_id,month(tgl_pembaruan),DATE_FORMAT(tgl_pembaruan, "%M")')
+                    ->groupByRaw('kolektibilitas_id,month(tgl_pembaruan),DATE_FORMAT(tgl_pembaruan, "%M"),b.nama')
                     ->orderByRaw('kolektibilitas_id,month(tgl_pembaruan),DATE_FORMAT(tgl_pembaruan, "%M")');
             })
             ->when(!$isMonth, function ($q) use ($maxMonthOfLastYears) {
