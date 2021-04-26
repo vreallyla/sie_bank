@@ -157,7 +157,7 @@ class Wilayah extends Component
 
     public function downloadExcel()
     {
-        return \Excel::download(new PenghasilanExport(), 'penghasilans-'.now()->format('Y-m-d-s').'.xlsx');
+        return \Excel::download(new WilayahExport(), 'wilayahs-'.now()->format('Y-m-d-s').'.xlsx');
     }
 
     /**

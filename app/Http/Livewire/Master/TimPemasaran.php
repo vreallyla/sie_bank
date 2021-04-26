@@ -123,14 +123,14 @@ class TimPemasaran extends Component
      */
     public function delete()
     {
-        
+
 
         DB::beginTransaction();
 
         try {
             TeamPemasaranDetail::where('team_id',$this->dataId)->delete();
             TeamPemasaran::destroy($this->dataId);
-            
+
 
             DB::commit();
             $this->reset();
@@ -185,12 +185,12 @@ class TimPemasaran extends Component
     {
         $this->resetValidation();
         $this->reset();
-        
+
         $this->dataId = $id;
         $this->loadModel();
         $this->modalFormVisible = true;
-        
-        
+
+
     }
 
     /**
@@ -208,16 +208,16 @@ class TimPemasaran extends Component
         ->get()
         ;
         $data = TeamPemasaran::find($this->dataId);
-        
+
         $this->region = $data->wilayah_id;
         $this->leader = $data->team_leader_id;
-        
+
         $this->member=[];
         foreach($member as $item){
             $this->member[]=collect($item)->toArray();
         }
-            
-        
+
+
     }
 
      /**
@@ -276,7 +276,7 @@ class TimPemasaran extends Component
     {
         $findIndex = collect($this->member)->pluck('id')->search($id);
         $this->member = collect($this->member)->forget($findIndex)->values()->all();
-        
+
     }
 
     private function getRegions()
@@ -292,7 +292,7 @@ class TimPemasaran extends Component
             $q->where('id', '!=',$dataId);
         })
             ->get(['team_leader_id'])->pluck('team_leader_id');
-            
+
 
         return DB::table(DB::raw('users as u'))
             ->where('level', '=', 'eksekutif')
