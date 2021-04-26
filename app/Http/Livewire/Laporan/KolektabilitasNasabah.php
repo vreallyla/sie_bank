@@ -70,16 +70,40 @@ class KolektabilitasNasabah extends ReportComponent
 
         $query = DB::table(DB::raw('nasabahs as a'))
             ->selectRaw("count(a.id) jumlah, b.id, b.$name as nama, 0 sub_id, 'semua' label")
-            ->rightJoin("$tableName as b", "a.$fk", 'b.id')
-            ->groupByRaw("b.id,a.$fk,b.$name")
-            ->when(!$isYears, function ($q) use ($pickYears) {
-                $q->whereRaw("year(tgl_real)=$pickYears");
+            
+            ->when($isYears, function ($q) use ($fk, $name) {
+                $q
+                    ->leftJoin("histori_kolektibilitas as c", function ($q) {
+                        $q->on("a.id", '=', 'c.nasabah_id');
+                        $q->on(DB::raw('year(tgl_pembaruan)'), DB::raw('year(tgl_real)'))
+                            ->where(function ($q) {
+                                $q->where(function ($q) {
+                                    $q->where(DB::raw('month(tgl_pembaruan)'), DB::raw('12'));
+                                })->orWhere(function ($q) {
+                                    $q->where(DB::raw('year(tgl_pembaruan)'), DB::raw('YEAR(CURDATE())'));
+                                    $q->where(DB::raw('month(tgl_pembaruan)'), DB::raw('month(CURDATE())'));
+                                });
+                            });
+                    });
             })
+            ->when(!$isYears, function ($q) use ($pickYears, $fk, $name) {
+                $q->whereRaw("year(tgl_real)=$pickYears")
+                    
+                    ->leftJoin("histori_kolektibilitas as c", function ($q) {
+                        $q->on("a.id", '=', 'c.nasabah_id');
+                        $q->on(DB::raw('year(tgl_pembaruan)'), DB::raw('year(tgl_real)'))
+                            ->on(DB::raw('month(tgl_pembaruan)'), DB::raw('month(tgl_real)'));
+                    });
+            })
+            ->rightJoin("$tableName as b", "c.$fk", 'b.id')
+            ->groupByRaw("c.$fk,b.id,b.$name")
+            
             ->unionAll($subUnion)
             ->orderByRaw('id,sub_id')
             // ->get()
         ;
 
+        // dd($query->toSql());
         return $query->get();
     }
 
@@ -124,7 +148,7 @@ class KolektabilitasNasabah extends ReportComponent
             })
             ->when(!$isYears, function ($q) use ($pickYears, $fk, $name) {
                 $q->whereRaw("year(tgl_real)=$pickYears")
-                    ->selectRaw("count(a.id) jumlah, b.id, b.$name as nama, month(tgl_real) sub_id, DATE_FORMAT(tgl_real, '%M') label")
+                    ->selectRaw("count(a.id) jumlah, month(tgl_real) id, DATE_FORMAT(tgl_real, '%M') as nama, b.id sub_id, b.$name label")
                     ->leftJoin("histori_kolektibilitas as c", function ($q) {
                         $q->on("a.id", '=', 'c.nasabah_id');
                         $q->on(DB::raw('year(tgl_pembaruan)'), DB::raw('year(tgl_real)'))
@@ -135,17 +159,41 @@ class KolektabilitasNasabah extends ReportComponent
             ->where("c.$fk",$pickRelationId)
             ->leftJoin("$tableName as b", "c.$fk", 'b.id');
 
+        // dd($subUnion->toSql());
+
         
 
 
         $query = DB::table(DB::raw('nasabahs as a'))
             ->selectRaw("count(b.id) jumlah, 0 as `id`, 'semua' nama,b.id sub_id, b.$name label")
-            ->leftJoin("$tableName as b", "a.$fk", 'b.id')
-            ->where("a.$fk", $pickRelationId)
-            ->groupByRaw("b.id,a.$fk")
-            ->when(!$isYears, function ($q) use ($pickYears) {
-                $q->whereRaw("year(tgl_real)=$pickYears");
+            
+            ->where("c.$fk", $pickRelationId)
+            ->groupByRaw("c.$fk,b.id,b.$name")
+            ->when($isYears, function ($q) use ($fk, $name) {
+                $q
+                    ->leftJoin("histori_kolektibilitas as c", function ($q) {
+                        $q->on("a.id", '=', 'c.nasabah_id');
+                        $q->on(DB::raw('year(tgl_pembaruan)'), DB::raw('year(tgl_real)'))
+                            ->where(function ($q) {
+                                $q->where(function ($q) {
+                                    $q->where(DB::raw('month(tgl_pembaruan)'), DB::raw('12'));
+                                })->orWhere(function ($q) {
+                                    $q->where(DB::raw('year(tgl_pembaruan)'), DB::raw('YEAR(CURDATE())'));
+                                    $q->where(DB::raw('month(tgl_pembaruan)'), DB::raw('month(CURDATE())'));
+                                });
+                            });
+                    });
             })
+            ->when(!$isYears, function ($q) use ($pickYears, $fk, $name) {
+                $q->whereRaw("year(tgl_real)=$pickYears")
+                    
+                    ->leftJoin("histori_kolektibilitas as c", function ($q) {
+                        $q->on("a.id", '=', 'c.nasabah_id');
+                        $q->on(DB::raw('year(tgl_pembaruan)'), DB::raw('year(tgl_real)'))
+                            ->on(DB::raw('month(tgl_pembaruan)'), DB::raw('month(tgl_real)'));
+                    });
+            })
+            ->leftJoin("$tableName as b", "c.$fk", 'b.id')
             ->unionAll($subUnion)
             ->orderByRaw('id,sub_id')
             ;

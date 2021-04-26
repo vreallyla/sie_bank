@@ -52,7 +52,7 @@ window.livewire.on("chartUpdate", (data) => {
             "&primary_value="+dataSlug.primary_value[firstPoint._index]+
             "&secondary="+dataSlug.secondary+
             "&secondary_value="+dataSlug.secondary_value[firstPoint._datasetIndex]+
-            (dataSlug.secondary=='bulan'?"&years="+dataSlug.years:'')
+            (dataSlug.secondary=='bulan'||dataSlug.primary=='bulan'?"&years="+dataSlug.years:'')
             , '_blank').focus()
             }
         };

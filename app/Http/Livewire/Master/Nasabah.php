@@ -5,7 +5,11 @@ namespace App\Http\Livewire\Master;
 use App\Exports\NasabahExport;
 use App\Models\Nasabah as ModelsNasabah;
 use App\Models\TeamPemasaran;
+use App\Models\Wilayah;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
+use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\Rule;
 use Livewire\Component;
 use Livewire\WithPagination;
@@ -30,8 +34,9 @@ class Nasabah extends Component
     public $team_id = '';
     public $telp;
     public $dataId;
-    public $rowPages=10;
+    public $rowPages = 10;
     public $search;
+    public $options;
 
     //event class
     public $modalFormVisible = false;
@@ -64,6 +69,26 @@ class Nasabah extends Component
         ];
     }
 
+    public function resetPages()
+    {
+        return redirect()->route('master.nasabah');
+    }
+
+    /**
+     * The livewire mount function
+     *
+     * @return void
+     */
+    public function mount(Request $r)
+    {
+
+
+        if (!$r->target) {
+
+            $this->resetPage();
+        }
+    }
+
 
     /**
      * Shows the form modal
@@ -87,13 +112,11 @@ class Nasabah extends Component
     {
 
         $this->validate();
-//        dd($this->modelData());
+        //        dd($this->modelData());
 
         ModelsNasabah::create($this->modelData());
         $this->modalFormVisible = false;
         $this->reset();
-
-
     }
 
     /**
@@ -118,7 +141,6 @@ class Nasabah extends Component
         ModelsNasabah::destroy($this->dataId);
         $this->modalConfirmDeleteVisible = false;
         $this->resetPage();
-
     }
 
     /**
@@ -161,7 +183,6 @@ class Nasabah extends Component
         $this->produk_id = $data->produk_id;
         $this->team_id = $data->team_id;
         $this->telp = $data->telp;
-
     }
 
     /**
@@ -176,48 +197,242 @@ class Nasabah extends Component
         $this->modalFormVisible = false;
     }
 
-    /**
-     * The livewire mount function
-     *
-     * @return void
-     */
-    public function mount(Request $r)
-    {
-        // Resets the pagination after reloading the page
-        $this->resetPage();
-        // dd($r->all());
-    }
+
 
     public function downloadExcel()
     {
-        return \Excel::download(new NasabahExport(), 'nasabahs-'.now()->format('Y-m-d-s').'.xlsx');
+        return \Excel::download(new NasabahExport(), 'nasabahs-' . now()->format('Y-m-d-s') . '.xlsx');
     }
+
+    private function varIntegrations()
+    {
+        return  [
+            'wilayah_id' => [
+                'tb' => 'wilayahs',
+                'row' => 'nama'
+            ],
+            'pendidikan_id' => [
+                'tb' => 'pendidikans',
+                'row' => 'singkatan'
+            ],
+            'penghasilan_id' => [
+                'tb' => 'penghasilans',
+                'row' => 'nama'
+            ],
+            'pekerjaan_id' => [
+                'tb' => 'pekerjaans',
+                'row' => 'nama'
+            ],
+            'produk_id' => [
+                'tb' => 'produks',
+                'row' => 'nama'
+            ],
+            'team_id' => [
+                'tb' => 'team_pemasarans',
+                'row' => 'name'
+            ],
+            'kolektibilitas_id' => [
+                'tb' => 'kolektibilitas',
+                'row' => 'singkatan'
+            ]
+        ];
+    }
+    private function dataIntegration($r)
+    {
+        $key = $this->varIntegrations();
+        $isTeam = $r->target == 'team_id';
+        $keyVal = array_search($r->target, $r->only(['primary', 'secondary']));
+        $secondVal = $keyVal !== 'primary' ? 'primary' : 'secondary';
+        $isDate = in_array($r->{$secondVal}, ['tahun', 'bulan']);
+
+
+        $name = !$r->{$keyVal . "_value"} ? 'Semua' : DB::table(DB::raw($key[$r->target]['tb'] . " as a"))
+            ->when($isTeam, function ($q) use ($key, $r) {
+                $q->join('users as u', 'u.id', 'a.team_leader_id')
+                    ->selectRaw('a.id,' .
+                        "SUBSTRING_INDEX(" .
+                        'u.' . $key[$r->target]['row'] .
+                        " , ' ', 1)" .
+
+                        ' as name');
+            })
+            ->when(!$isTeam, function ($q) use ($key, $r) {
+                $q->selectRaw('a.id,a.' . $key[$r->target]['row'] . ' as name');
+            })
+            ->where('a.id', $r->{$keyVal . '_value'})
+            ->get()[0]->name;
+        if (!$isDate) {
+
+            $dateOrRegion = Wilayah::find($r->{$secondVal . "_value"})->nama;
+            $dateOrRegion = " ($dateOrRegion)";
+        } else {
+            $kon = $r->{$secondVal . "_value"} || $r->{$secondVal} == 'bulan';
+
+            $dateOrRegion = !$kon ? '' : " " . ($r->{$secondVal} == 'tahun' ? $r->{$secondVal . "_value"} : (!$r->{$secondVal . "_value"} ? '' : Carbon::createFromDate($r->years, $r->{$secondVal . "_value"}, 1)->isoFormat('MMM')) . " $r->years");
+        }
+
+
+
+
+        $this->options = new Collection(array_replace($r->all(), [
+            'target' => explode('_', $r->target)[0],
+            'name' => $name,
+            'dateOrRegion' => $dateOrRegion
+        ]));
+    }
+
 
     /**
      * The table data.
      *
      * @return void
      */
-    public function read()
+    public function read($r)
     {
-        $search=$this->search;
-        return ModelsNasabah::when($search,function($q)use($search){
-            $q->where('nik','like',"%$search%");
-            $q->where('tgl_real','like',"%$search%");
-            $q->where('no_debitur','like',"%$search%");
-            $q->where('nama','like',"%$search%");
-            $q->where('tgl_lahir','like',"%$search%");
-            $q->where('alamat_anggunan','like',"%$search%");
-            $q->where('alamat_instansi','like',"%$search%");
-            $q->orWhere('wilayah_id','like',"%$search%");
-            $q->orWhere('pekerjaan_id','like',"%$search%");
-            $q->orWhere('penghasilan_id','like',"%$search%");
-            $q->orWhere('pendidikan_id','like',"%$search%");
-            $q->orWhere('kolektibilitas_id','like',"%$search%");
-            $q->orWhere('produk_id','like',"%$search%");
-            $q->orWhere('team_id','like',"%$search%");
-            $q->orWhere('telp','like',"%$search%");
+        if ($r->target) {
+            $this->dataIntegration($r);
+        }
+
+        $ops = $this->options;
+        $key = $this->varIntegrations();
+
+        $search = $this->search;
+        $dt = ['primary', 'secondary'];
+        $db = [
+            (array_key_exists($ops[$dt[0]], $key) ?
+                $key[$ops[$dt[0]]]['tb'] : 0),
+            (array_key_exists($ops[$dt[1]], $key) ?
+                $key[$ops[$dt[1]]]['tb'] : 0)
+        ];
+
+        $result = ModelsNasabah::when($search, function ($q) use ($search) {
+            $q->where('nik', 'like', "%$search%");
+            $q->Orwhere('tgl_real', 'like', "%$search%");
+            $q->Orwhere('no_debitur', 'like', "%$search%");
+            $q->Orwhere('nama', 'like', "%$search%");
+            $q->Orwhere('alamat_anggunan', 'like', "%$search%");
+            $q->Orwhere('alamat_instansi', 'like', "%$search%");
         })
+            ->when($ops, function ($q) use ($ops, $key, $dt, $db) {
+
+
+                $q->when($ops[$dt[0]], function ($q) use ($ops, $key, $dt, $db) {
+
+                    $q->when($db[0] && $db[0] !== 'kolektibilitas' && $ops[$dt[0] . '_value'], function ($q) use ($ops, $dt, $db) {
+                        $q->where("nasabahs." . $ops[$dt[0]], $ops[$dt[0] . '_value']);
+                    })
+                        ->when($db[0] === 'kolektibilitas' && $ops[$dt[0] . '_value'], function ($q) use ($ops, $dt) {
+
+                            $isMonth = $ops[$dt[1]] == 'bulan';
+                            $pickYears = $isMonth ? $ops['years'] : null;
+                            $q->when($isMonth, function ($q) use ($pickYears, $ops, $dt) {
+                                $q
+                                    // ->whereRaw("year(tgl_real)=$pickYears")
+                                    ->leftJoin("histori_kolektibilitas as c", function ($q) {
+                                        $q->on("nasabahs.id", '=', 'c.nasabah_id');
+                                        $q->on(DB::raw('year(tgl_pembaruan)'), DB::raw('year(tgl_real)'))
+                                            ->on(DB::raw('month(tgl_pembaruan)'), DB::raw('month(tgl_real)'));
+                                    })
+                                    ->whereRaw("c.kolektibilitas_id=" . $ops[$dt[0] . '_value']);
+                            });
+                            $q->when(!$isMonth, function ($q) use ($ops, $dt) {
+                                $q
+                                    ->leftJoin("histori_kolektibilitas as c", function ($q) {
+                                        $q->on("nasabahs.id", '=', 'c.nasabah_id');
+                                        $q->on(DB::raw('year(tgl_pembaruan)'), DB::raw('year(tgl_real)'))
+                                            ->where(function ($q) {
+                                                $q->where(function ($q) {
+                                                    $q->where(DB::raw('month(tgl_pembaruan)'), DB::raw('12'));
+                                                })->orWhere(function ($q) {
+                                                    $q->where(DB::raw('year(tgl_pembaruan)'), DB::raw('YEAR(CURDATE())'));
+                                                    $q->where(DB::raw('month(tgl_pembaruan)'), DB::raw('month(CURDATE())'));
+                                                });
+                                            });
+                                    })
+                                    ->whereRaw("c.kolektibilitas_id=" . $ops[$dt[0] . '_value']);
+                            });
+                        })
+                        ->when(!$db[0] && ($ops[$dt[0] . '_value'] || $ops[$dt[0]] == 'bulan'), function ($q) use ($ops, $dt) {
+                            $isMonth = $ops[$dt[0]] == 'bulan';
+                            $pickYears = $isMonth ? $ops['years'] : null;
+                            $q->when($isMonth, function ($q) use ($pickYears, $ops, $dt) {
+                                $q->whereRaw('Year(tgl_real)='. $pickYears);
+                                if ($ops[$dt[0] . '_value']) {
+                                    $q->whereRaw('Month(tgl_real)='. $ops[$dt[0] . '_value']);
+                                }
+                            });
+
+                            $q->when(!$isMonth, function ($q) use ($ops, $dt) {
+                                $q->whereYear('tgl_real', $ops[$dt[0] . '_value']);
+                            });
+                        });
+                });
+            })
+            ->when($ops, function ($q) use ($ops, $key, $dt, $db) {
+                $q->when($ops[$dt[1]], function ($q) use ($ops, $key, $dt, $db) {
+
+
+                    $q->when($db[1] && $db[1] !== 'kolektibilitas' && $ops[$dt[1] . '_value'], function ($q) use ($ops, $dt, $db) {
+
+                        $q->where("nasabahs." . $ops[$dt[1]], $ops[$dt[1] . '_value']);
+                    });
+                    $q->when($db[1] === 'kolektibilitas' && $ops[$dt[1] . '_value'], function ($q) use ($ops, $dt, $db) {
+
+                        $isMonth = $ops[$dt[0]] == 'bulan';
+                        $pickYears = $isMonth ? $ops['years'] : null;
+                        $q->when($isMonth, function ($q) use ($pickYears, $ops, $dt) {
+                            $q
+                                // ->whereYear("tgl_real", $pickYears)
+                                ->whereRaw("c.kolektibilitas_id=" . $ops[$dt[1] . '_value'])
+                                ->leftJoin("histori_kolektibilitas as c", function ($q) {
+                                    $q->on("nasabahs.id", '=', 'c.nasabah_id');
+                                    $q->on(DB::raw('year(tgl_pembaruan)'), DB::raw('year(tgl_real)'))
+                                        ->on(DB::raw('month(tgl_pembaruan)'), DB::raw('month(tgl_real)'));
+                                });
+                            // if ($ops[$dt[1] . '_value']) {
+                            //     $q->whereRaw("month(tgl_real)=". $ops[$dt[1] . '_value']);
+                            // }
+                        });
+                        $q->when(!$isMonth, function ($q) use ($ops, $dt) {
+                            $q
+                                ->whereRaw("c.kolektibilitas_id=" . $ops[$dt[1] . '_value'])
+                                ->leftJoin("histori_kolektibilitas as c", function ($q) {
+                                    $q->on("nasabahs.id", '=', 'c.nasabah_id');
+                                    $q->on(DB::raw('year(tgl_pembaruan)'), DB::raw('year(tgl_real)'))
+                                        ->where(function ($q) {
+                                            $q->where(function ($q) {
+                                                $q->where(DB::raw('month(tgl_pembaruan)'), DB::raw('12'));
+                                            })->orWhere(function ($q) {
+                                                $q->where(DB::raw('year(tgl_pembaruan)'), DB::raw('YEAR(CURDATE())'));
+                                                $q->where(DB::raw('month(tgl_pembaruan)'), DB::raw('month(CURDATE())'));
+                                            });
+                                        });
+                                });
+                        });
+                    });
+                    $q->when(!$db[1] && ($ops[$dt[1] . '_value'] || $ops[$dt[1]] == 'bulan'), function ($q) use ($ops, $dt) {
+                        $isMonth = $ops[$dt[1]] == 'bulan';
+                        $pickYears = $isMonth ? $ops['years'] : null;
+                        $q->when($isMonth, function ($q) use ($pickYears, $ops, $dt) {
+                            $q->whereYear('tgl_real', $pickYears);
+                            if ($ops[$dt[1] . '_value']) {
+                                $q->whereMonth('tgl_real', $ops[$dt[1] . '_value']);
+                            }
+                        });
+
+                        $q->when(!$isMonth, function ($q) use ($ops, $dt) {
+                            $q->whereYear('tgl_real', $ops[$dt[1] . '_value']);
+                        });
+                    });
+                });
+            })
+            ->leftJoin('wilayahs as b', 'b.id', 'nasabahs.wilayah_id')
+            ->selectRaw("nasabahs.id,nik,tgl_real,nasabahs.nama,no_debitur,b.nama as wilayah");
+
+
+        // dd($result->toSql());
+
+        return $result
             ->paginate($this->rowPages);
     }
 
@@ -229,7 +444,7 @@ class Nasabah extends Component
      */
     public function modelData()
     {
-        $wilayah_id=TeamPemasaran::find($this->team_id)->wilayah_id;
+        $wilayah_id = TeamPemasaran::find($this->team_id)->wilayah_id;
         return [
             'nik' => $this->nik,
             'tgl_real' => $this->tgl_real,
@@ -276,17 +491,16 @@ class Nasabah extends Component
     }
     private function getTeam()
     {
-        $result= \App\Models\TeamPemasaran::join('wilayahs as b','team_pemasarans.wilayah_id','b.id')
-            ->join('users as u','team_pemasarans.team_leader_id','u.id')
-           ->selectRaw("team_pemasarans.id, concat('Team ',SUBSTRING_INDEX(u.name, ' ', 1),' (',b.nama,')') as nama")
-            ;
+        $result = \App\Models\TeamPemasaran::join('wilayahs as b', 'team_pemasarans.wilayah_id', 'b.id')
+            ->join('users as u', 'team_pemasarans.team_leader_id', 'u.id')
+            ->selectRaw("team_pemasarans.id, concat('Team ',SUBSTRING_INDEX(u.name, ' ', 1),' (',b.nama,')') as nama");
 
-        return $result  ->get();
+        return $result->get();
     }
-    public function render()
+    public function render(Request $r)
     {
         return view('livewire.master.nasabah', [
-            'data' => $this->read(),
+            'data' => $this->read($r),
             'wilayahList' => $this->getWilayah(),
             'profesiList' => $this->getPekerjaan(),
             'penghasilanList' => $this->getPenghasilan(),
@@ -295,7 +509,6 @@ class Nasabah extends Component
             'produkList' => $this->getProduk(),
             'teamList' => $this->getTeam(),
         ])
-        ->layout('layouts.head')
-        ;
+            ->layout('layouts.head');
     }
 }
