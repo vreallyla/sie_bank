@@ -25,7 +25,7 @@ class ReportComponent extends Component
     public ?int $pickMonth = null;
     public bool $modalChartFormVisible = false;
     public array $tableRelation=[];
-          
+
       /**
      * queryDataAll
      *
@@ -53,7 +53,7 @@ class ReportComponent extends Component
                     ->selectRaw("count(a.id) jumlah, b.id, b.$name as nama, month(tgl_real) sub_id, DATE_FORMAT(tgl_real, '%M') label")
                     ->groupByRaw("b.id,month(tgl_real),a.$fk,b.$name,DATE_FORMAT(tgl_real, '%M')");
             });
-        
+
 
 
         $query = DB::table(DB::raw('nasabahs as a'))
@@ -72,7 +72,7 @@ class ReportComponent extends Component
 
         return $query->get();
     }
-    
+
     /**
      * queryDataByRegions
      *
@@ -108,9 +108,9 @@ class ReportComponent extends Component
             ->where("a.$fk",$pickRelationId)
             ->when(!$isYears, function ($q) use ($pickYears) {
                 $q->whereRaw("year(tgl_real)=$pickYears")
-                ->groupByRaw('DATE_FORMAT(tgl_real, "%M")');     
+                ->groupByRaw('DATE_FORMAT(tgl_real, "%M")');
             });
-            
+
 
 
         $query = DB::table(DB::raw('nasabahs as a'))
@@ -126,7 +126,7 @@ class ReportComponent extends Component
             ->orderByRaw('id,sub_id')
             ->get()
         ;
-        
+
         return $query;
     }
 
@@ -136,7 +136,7 @@ class ReportComponent extends Component
      * @return void
      */
     public function setPieBarVars()
-    {      
+    {
         $setRegion=$this->pickRelationId;
         $query = $setRegion?$this->queryDataByRegions():$this->queryDataAll();
         $fk=$this->tableRelation['fk'];
@@ -189,8 +189,8 @@ class ReportComponent extends Component
                 ]
             ]
         ]);
-    } 
-    
+    }
+
     /**
      * get available month of years data
      *
@@ -209,7 +209,7 @@ class ReportComponent extends Component
         return $result;
     }
 
-  
+
 
     /**
      * get available years data
@@ -239,9 +239,9 @@ class ReportComponent extends Component
     public function chartChange()
     {
         $this->changeChart=true;
-        
+
     }
-    
+
     /**
      * getParams
      *
@@ -284,11 +284,11 @@ class ReportComponent extends Component
     }
 
 
-    
+
 
     public function render()
     {
-        
+
 
 
 
