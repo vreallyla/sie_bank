@@ -279,6 +279,8 @@ class Nasabah extends Component
             'name' => $name,
             'dateOrRegion' => $dateOrRegion
         ]));
+
+        
     }
 
 
@@ -294,16 +296,21 @@ class Nasabah extends Component
         }
 
         $ops = $this->options;
+        
         $key = $this->varIntegrations();
+        $dt=$db=null;
 
         $search = $this->search;
-        $dt = ['primary', 'secondary'];
-        $db = [
-            (array_key_exists($ops[$dt[0]], $key) ?
-                $key[$ops[$dt[0]]]['tb'] : 0),
-            (array_key_exists($ops[$dt[1]], $key) ?
-                $key[$ops[$dt[1]]]['tb'] : 0)
-        ];
+
+        if ($ops) {
+            $dt = ['primary', 'secondary'];
+            $db = [
+                (array_key_exists($ops[$dt[0]], $key) ?
+                    $key[$ops[$dt[0]]]['tb'] : 0),
+                (array_key_exists($ops[$dt[1]], $key) ?
+                    $key[$ops[$dt[1]]]['tb'] : 0)
+            ];
+        }
 
         $result = ModelsNasabah::when($search, function ($q) use ($search) {
             $q->where('nik', 'like', "%$search%");
@@ -356,9 +363,9 @@ class Nasabah extends Component
                             $isMonth = $ops[$dt[0]] == 'bulan';
                             $pickYears = $isMonth ? $ops['years'] : null;
                             $q->when($isMonth, function ($q) use ($pickYears, $ops, $dt) {
-                                $q->whereRaw('Year(tgl_real)='. $pickYears);
+                                $q->whereRaw('Year(tgl_real)=' . $pickYears);
                                 if ($ops[$dt[0] . '_value']) {
-                                    $q->whereRaw('Month(tgl_real)='. $ops[$dt[0] . '_value']);
+                                    $q->whereRaw('Month(tgl_real)=' . $ops[$dt[0] . '_value']);
                                 }
                             });
 

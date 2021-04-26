@@ -14,6 +14,7 @@
         <div class="w-2/6 justify-end items-center flex">
             @if ($options)
                 <div class="shadow flex bg-gray-400 px-3 py-2 text-white rounded-full">
+                    
                     <span>{{ucwords($options['target'].' '.$options['name'].$options['dateOrRegion'])}}</span>
                     <i wire:click="resetPages()" class="material-icons text-sm cursor-pointer">close</i>
                 </div>
