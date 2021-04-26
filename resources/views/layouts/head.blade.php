@@ -55,7 +55,33 @@
                 <ul class="hidden sm:flex sm:text-left text-gray-200 text-sm">
 
                     <a href="{{ url('/') }}">
-                        <li class="cursor-pointer px-4 py-2 hover:bg-gray-800">Fahmi Rizky</li>
+                        <li class="cursor-pointer px-4 py-2 hover:bg-gray-800">
+                            <x-jet-dropdown align="right" width="48">
+                                <x-slot name="trigger">
+                                    {{ Auth::user()->name }}
+                                </x-slot>
+                                <x-slot name="content">
+                                    <!-- Account Management -->
+                                    <div class="block px-4 py-2 text-xs text-gray-400">
+                                        {{ __('Manage Account') }}
+                                    </div>
+
+                                    <x-jet-dropdown-link href="{{ route('profile.show') }}">
+                                        {{ __('Profile') }}
+                                    </x-jet-dropdown-link>
+                                    <!-- Authentication -->
+                                    <form method="POST" action="{{ route('logout') }}">
+                                        @csrf
+
+                                        <x-jet-dropdown-link href="{{ route('logout') }}" onclick="event.preventDefault();
+                                                this.closest('form').submit();">
+                                            {{ __('Log Out') }}
+                                        </x-jet-dropdown-link>
+                                    </form>
+
+                                </x-slot>
+                            </x-jet-dropdown>
+                        </li>
                     </a>
 
                 </ul>
@@ -73,136 +99,136 @@
                             <span class="flex items-center">Dasboard</span>
                         </li>
                     </a>
-                    @if (auth()->user()->level == "admin")
-                    <li class="flex-col">
-                        <div @click="showSub = showSub=='master'?'':'master'" :class="showSub === 'master' ? 'active' : ''"
-                            class="menu with-sub flex gap-2">
-                            <i class="material-icons flex items-center">layers</i>
-                            <span class="flex items-center">Data Master</span>
-                        </div>
-                        <ul class="sub-menu">
-                            <a href="{{ route('master.kolektibilitas') }}">
-                                <li class="menu">
-                                    <i class="material-icons flex items-center">donut_large</i>
-                                    <span class="flex items-center">Daftar Kolektibilitas</span>
-                                </li>
-                            </a>
+                    @if (auth()->user()->level == 'admin')
+                        <li class="flex-col">
+                            <div @click="showSub = showSub=='master'?'':'master'"
+                                :class="showSub === 'master' ? 'active' : ''" class="menu with-sub flex gap-2">
+                                <i class="material-icons flex items-center">layers</i>
+                                <span class="flex items-center">Data Master</span>
+                            </div>
+                            <ul class="sub-menu">
+                                <a href="{{ route('master.kolektibilitas') }}">
+                                    <li class="menu">
+                                        <i class="material-icons flex items-center">donut_large</i>
+                                        <span class="flex items-center">Daftar Kolektibilitas</span>
+                                    </li>
+                                </a>
 
-                            <a href="{{ route('master.nasabah') }}">
-                                <li class="menu">
-                                    <i class="material-icons flex items-center">donut_large</i>
-                                    <span class="flex items-center">Daftar Nasabah</span>
-                                </li>
-                            </a>
+                                <a href="{{ route('master.nasabah') }}">
+                                    <li class="menu">
+                                        <i class="material-icons flex items-center">donut_large</i>
+                                        <span class="flex items-center">Daftar Nasabah</span>
+                                    </li>
+                                </a>
 
-                            <a href="{{ route('master.pendidikan') }}">
-                                <li class="menu">
-                                    <i class="material-icons flex items-center">donut_large</i>
-                                    <span class="flex items-center">Daftar Pendidikan</span>
-                                </li>
-                            </a>
+                                <a href="{{ route('master.pendidikan') }}">
+                                    <li class="menu">
+                                        <i class="material-icons flex items-center">donut_large</i>
+                                        <span class="flex items-center">Daftar Pendidikan</span>
+                                    </li>
+                                </a>
 
-                            <a href="{{ route('master.pegawai') }}">
-                                <li class="menu">
-                                    <i class="material-icons flex items-center">donut_large</i>
-                                    <span class="flex items-center">Daftar Pegawai</span>
-                                </li>
-                            </a>
+                                <a href="{{ route('master.pegawai') }}">
+                                    <li class="menu">
+                                        <i class="material-icons flex items-center">donut_large</i>
+                                        <span class="flex items-center">Daftar Pegawai</span>
+                                    </li>
+                                </a>
 
-                            <a href="{{ route('master.penghasilan') }}">
-                                <li class="menu">
-                                    <i class="material-icons flex items-center">donut_large</i>
-                                    <span class="flex items-center">Daftar Penghasilan</span>
-                                </li>
-                            </a>
+                                <a href="{{ route('master.penghasilan') }}">
+                                    <li class="menu">
+                                        <i class="material-icons flex items-center">donut_large</i>
+                                        <span class="flex items-center">Daftar Penghasilan</span>
+                                    </li>
+                                </a>
 
-                            <a href="{{ route('master.profesi') }}">
-                                <li class="menu">
-                                    <i class="material-icons flex items-center">donut_large</i>
-                                    <span class="flex items-center">Daftar Profesi</span>
-                                </li>
-                            </a>
+                                <a href="{{ route('master.profesi') }}">
+                                    <li class="menu">
+                                        <i class="material-icons flex items-center">donut_large</i>
+                                        <span class="flex items-center">Daftar Profesi</span>
+                                    </li>
+                                </a>
 
-                            <a href="{{ route('master.produk') }}">
-                                <li class="menu">
-                                    <i class="material-icons flex items-center">donut_large</i>
-                                    <span class="flex items-center">Daftar Produk</span>
-                                </li>
-                            </a>
+                                <a href="{{ route('master.produk') }}">
+                                    <li class="menu">
+                                        <i class="material-icons flex items-center">donut_large</i>
+                                        <span class="flex items-center">Daftar Produk</span>
+                                    </li>
+                                </a>
 
-                            <a href="{{ route('master.tim_pemasaran') }}">
-                                <li class="menu">
-                                    <i class="material-icons flex items-center">donut_large</i>
-                                    <span class="flex items-center">Tim Pemasaran</span>
-                                </li>
-                            </a>
-                            <a href="{{ route('master.wilayah') }}">
-                                <li class="menu">
-                                    <i class="material-icons flex items-center">donut_large</i>
-                                    <span class="flex items-center">Daftar Wilayah</span>
-                                </li>
-                            </a>
-                        </ul>
-                    </li>
+                                <a href="{{ route('master.tim_pemasaran') }}">
+                                    <li class="menu">
+                                        <i class="material-icons flex items-center">donut_large</i>
+                                        <span class="flex items-center">Tim Pemasaran</span>
+                                    </li>
+                                </a>
+                                <a href="{{ route('master.wilayah') }}">
+                                    <li class="menu">
+                                        <i class="material-icons flex items-center">donut_large</i>
+                                        <span class="flex items-center">Daftar Wilayah</span>
+                                    </li>
+                                </a>
+                            </ul>
+                        </li>
                     @endif
-                    @if (auth()->user()->level == "eksekutif")
-                    <li class="flex-col">
-                        <div @click="showSub = showSub=='laporan' ?'':'laporan'" :class="showSub === 'laporan' ? 'active' : ''"
-                            class="menu with-sub flex gap-2">
-                            <i class="material-icons flex items-center">receipt</i>
-                            <span class="flex items-center">Laporan</span>
-                        </div>
-                        <ul class="sub-menu">
-                            <a href="{{ route('laporan.nasabah') }}">
-                                <li class="menu">
-                                    <i class="material-icons flex items-center">donut_large</i>
-                                    <span class="flex items-center">Wilayah Nasabah</span>
-                                </li>
-                            </a>
-                            <a href="{{ route('laporan.kolektabilitas_nasabah') }}">
-                                <li class="menu">
-                                    <i class="material-icons flex items-center">donut_large</i>
-                                    <span class="flex items-center">Kolektibilitas Nasabah</span>
-                                </li>
-                            </a>
+                    @if (auth()->user()->level == 'eksekutif')
+                        <li class="flex-col">
+                            <div @click="showSub = showSub=='laporan' ?'':'laporan'"
+                                :class="showSub === 'laporan' ? 'active' : ''" class="menu with-sub flex gap-2">
+                                <i class="material-icons flex items-center">receipt</i>
+                                <span class="flex items-center">Laporan</span>
+                            </div>
+                            <ul class="sub-menu">
+                                <a href="{{ route('laporan.nasabah') }}">
+                                    <li class="menu">
+                                        <i class="material-icons flex items-center">donut_large</i>
+                                        <span class="flex items-center">Wilayah Nasabah</span>
+                                    </li>
+                                </a>
+                                <a href="{{ route('laporan.kolektabilitas_nasabah') }}">
+                                    <li class="menu">
+                                        <i class="material-icons flex items-center">donut_large</i>
+                                        <span class="flex items-center">Kolektibilitas Nasabah</span>
+                                    </li>
+                                </a>
 
-                            <a href="{{ route('laporan.pendidikan_nasabah') }}">
-                                <li class="menu">
-                                    <i class="material-icons flex items-center">donut_large</i>
-                                    <span class="flex items-center">Pendidikan Nasabah</span>
-                                </li>
-                            </a>
+                                <a href="{{ route('laporan.pendidikan_nasabah') }}">
+                                    <li class="menu">
+                                        <i class="material-icons flex items-center">donut_large</i>
+                                        <span class="flex items-center">Pendidikan Nasabah</span>
+                                    </li>
+                                </a>
 
-                            <a href="{{ route('laporan.penghasilan_nasabah') }}">
-                                <li class="menu">
-                                    <i class="material-icons flex items-center">donut_large</i>
-                                    <span class="flex items-center">Penghasilan Nasabah</span>
-                                </li>
-                            </a>
+                                <a href="{{ route('laporan.penghasilan_nasabah') }}">
+                                    <li class="menu">
+                                        <i class="material-icons flex items-center">donut_large</i>
+                                        <span class="flex items-center">Penghasilan Nasabah</span>
+                                    </li>
+                                </a>
 
-                            <a href="{{ route('laporan.profesi_nasabah') }}">
-                                <li class="menu">
-                                    <i class="material-icons flex items-center">donut_large</i>
-                                    <span class="flex items-center">Profesi Nasabah</span>
-                                </li>
-                            </a>
+                                <a href="{{ route('laporan.profesi_nasabah') }}">
+                                    <li class="menu">
+                                        <i class="material-icons flex items-center">donut_large</i>
+                                        <span class="flex items-center">Profesi Nasabah</span>
+                                    </li>
+                                </a>
 
-                            <a href="{{ route('laporan.pemakaian_produk') }}">
-                                <li class="menu">
-                                    <i class="material-icons flex items-center">donut_large</i>
-                                    <span class="flex items-center">Pemakaian Produk</span>
-                                </li>
-                            </a>
+                                <a href="{{ route('laporan.pemakaian_produk') }}">
+                                    <li class="menu">
+                                        <i class="material-icons flex items-center">donut_large</i>
+                                        <span class="flex items-center">Pemakaian Produk</span>
+                                    </li>
+                                </a>
 
-                            <a href="{{ route('laporan.kinerja_pemasaran') }}">
-                                <li class="menu">
-                                    <i class="material-icons flex items-center">donut_large</i>
-                                    <span class="flex items-center">Kinerja Pemasaran</span>
-                                </li>
-                            </a>
+                                <a href="{{ route('laporan.kinerja_pemasaran') }}">
+                                    <li class="menu">
+                                        <i class="material-icons flex items-center">donut_large</i>
+                                        <span class="flex items-center">Kinerja Pemasaran</span>
+                                    </li>
+                                </a>
 
-                        </ul>
-                    </li>
+                            </ul>
+                        </li>
                     @endif
 
 
