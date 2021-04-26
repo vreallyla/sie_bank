@@ -4,7 +4,7 @@
         {{-- head sisi kiri --}}
         <div class="w-4/6">
             <h1 class="text-3xl font-bold">Selamat Datang di Aplikasi Kami</h1>
-            <span>Kamu masuk sebagia Eksekutif</span>
+            <span>Kamu masuk sebagai {{ucwords(Auth::user()->level)}}</span>
         </div>
 
         {{-- head sisi kanan --}}

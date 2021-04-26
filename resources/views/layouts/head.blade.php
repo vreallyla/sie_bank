@@ -54,7 +54,8 @@
                 {{-- Top Navigation --}}
                 <ul class="hidden sm:flex sm:text-left text-gray-200 text-sm">
 
-                    <a href="{{ url('/') }}">
+                    <a href="#">
+                        @if (auth()->check())
                         <li class="cursor-pointer px-4 py-2 hover:bg-gray-800">
                             <x-jet-dropdown align="right" width="48">
                                 <x-slot name="trigger">
@@ -82,6 +83,11 @@
                                 </x-slot>
                             </x-jet-dropdown>
                         </li>
+                        @else
+                            <li>
+                                Guest
+                            </li>
+                        @endif
                     </a>
 
                 </ul>
