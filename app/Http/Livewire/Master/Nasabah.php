@@ -4,6 +4,7 @@ namespace App\Http\Livewire\Master;
 
 use App\Exports\NasabahExport;
 use App\Models\Nasabah as ModelsNasabah;
+use App\Models\TeamPemasaran;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
 use Livewire\Component;
@@ -21,7 +22,6 @@ class Nasabah extends Component
     public $tgl_lahir;
     public $alamat_anggunan;
     public $alamat_instansi;
-    public $wilayah_id = '';
     public $pekerjaan_id = '';
     public $penghasilan_id = '';
     public $pendidikan_id = '';
@@ -53,7 +53,6 @@ class Nasabah extends Component
             'tgl_lahir' => ['required'],
             'alamat_anggunan' => ['required'],
             'alamat_instansi' => ['required'],
-            'wilayah_id' => ['required', Rule::exists('wilayahs', 'id')],
             'pekerjaan_id' => ['required', Rule::exists('pekerjaans', 'id')],
             'penghasilan_id' => ['required', Rule::exists('penghasilans', 'id')],
             'pendidikan_id' => ['required', Rule::exists('pendidikans', 'id')],
@@ -86,7 +85,9 @@ class Nasabah extends Component
      */
     public function create()
     {
+
         $this->validate();
+//        dd($this->modelData());
 
         ModelsNasabah::create($this->modelData());
         $this->modalFormVisible = false;
@@ -228,6 +229,7 @@ class Nasabah extends Component
      */
     public function modelData()
     {
+        $wilayah_id=TeamPemasaran::find($this->team_id)->wilayah_id;
         return [
             'nik' => $this->nik,
             'tgl_real' => $this->tgl_real,
@@ -236,7 +238,7 @@ class Nasabah extends Component
             'tgl_lahir' => $this->tgl_lahir,
             'alamat_anggunan' => $this->alamat_anggunan,
             'alamat_instansi' => $this->alamat_instansi,
-            'wilayah_id' => $this->wilayah_id,
+            'wilayah_id' => $wilayah_id,
             'pekerjaan_id' => $this->pekerjaan_id,
             'penghasilan_id' => $this->penghasilan_id,
             'pendidikan_id' => $this->pendidikan_id,
@@ -274,7 +276,12 @@ class Nasabah extends Component
     }
     private function getTeam()
     {
-        return \App\Models\TeamPemasaran::all();
+        $result= \App\Models\TeamPemasaran::join('wilayahs as b','team_pemasarans.wilayah_id','b.id')
+            ->join('users as u','team_pemasarans.team_leader_id','u.id')
+           ->selectRaw("team_pemasarans.id, concat('Team ',SUBSTRING_INDEX(u.name, ' ', 1),' (',b.nama,')') as nama")
+            ;
+
+        return $result  ->get();
     }
     public function render()
     {

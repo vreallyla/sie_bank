@@ -253,7 +253,7 @@
                 <select wire:model.debounce.800ms="team_id" class="border-white mt-1 w-full" id="team_id">
                     <option value="" selected disabled>Pilih Team dan Wilayah</option>
                     @foreach ($teamList as $item)
-                        <option value="{{$item->id}}" {{ $item->id==$team_id?'selected':'' }}>{{$item->team_leader_id}} - {{$item->wilayah_id}}</option>
+                        <option value="{{$item->id}}" {{ $item->id==$team_id?'selected':'' }}>{{$item->nama}}</option>
                     @endforeach
                 </select>
                 @error('team_id') <span class="error">{{ $message }}</span> @enderror
