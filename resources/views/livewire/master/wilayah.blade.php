@@ -142,7 +142,7 @@
                 <x-jet-label for="telp"  >
                     {{ __('No.Telp') }}<span class="text-base text-gray-400">*</span>
                 </x-jet-label>
-                <x-jet-input id="telp" class="block mt-1 w-full" type="number" placeholder="Isi Telp" wire:model.debounce.800ms="telp" />
+                <x-jet-input id="telp" class="block mt-1 w-full" type="text" placeholder="Isi Telp" wire:model.debounce.800ms="telp" />
                 @error('telp') <span class="error">{{ $message }}</span> @enderror
             </div>
             <div class="mt-4">
