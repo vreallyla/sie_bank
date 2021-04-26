@@ -87,11 +87,11 @@
         {{-- grafik sisi kanan --}}
         <div class="ml-1 md:ml-2 lg:ml-3 w-2/6">
             {{-- pie grafik kolektibilitas --}}
-            <div wire:ignore class="my-2 md:my-4 lg:my-6 py-3 px-6 text-sm bg-gray-900 shadow rounded-md">
+            <div class="my-2 md:my-4 lg:my-6 py-3 px-6 text-sm bg-gray-900 shadow rounded-md">
                 <div class="pb-1">
                     <h4 class="text-base font-thin text-gray-400">Presentase {{$pickRelationId?($opsRange=='tahun'?'Pertahun':'Perbulan'):'Wilayah'}}</h4>
                 </div>
-                <div class="w-full" wire:key="{{ $chartPie['id'] }}">
+                <div wire:ignore class="w-full" wire:key="{{ $chartPie['id'] }}">
                     @include('addons.charts.pie',['id'=>$chartPie['id'],'chart'=>$chartPie['chart']])
 
                 </div>

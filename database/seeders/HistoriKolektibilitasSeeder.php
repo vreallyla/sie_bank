@@ -25,7 +25,7 @@ class HistoriKolektibilitasSeeder extends Seeder
         foreach ($nasabah as $dt) {
 
             foreach (range($dt->tahun, now()->format('Y')) as $tahun) {
-                foreach (range($dt->tahun==now()->format('Y')?$dt->bulan:1, ($tahun == now()->format('Y') ? now()->format('m') : 12)) as $bulan) {
+                foreach (range($dt->bulan, ($tahun == now()->format('Y') ? now()->format('m') : 12)) as $bulan) {
                     HistoriKolektibilitas::create([
                         'nasabah_id' => $dt->id,
                         'kolektibilitas_id'=>

@@ -3,10 +3,10 @@
     <div class="flex gap-14">
         {{-- head sisi kiri --}}
         <div class="w-4/6">
-            <h1 class="text-3xl font-bold">Laporan Wilayah Nasabah</h1>
+            <h1 class="text-3xl font-bold">Laporan Pendidikan Nasabah</h1>
             <div class="breadcumb">
                 <a href="{{ route('dashboard') }}">Dasboard</a>
-                <span>Laporan Wilayah Nasabah</span>
+                <span>Laporan Pendidikan Nasabah</span>
             </div>
         </div>
 
@@ -23,11 +23,11 @@
     <article class="flex mt-5">
         {{-- grafik sisi kiri --}}
         <div class="mr-1 md:mr-2 lg:mr-3 w-4/6">
-            {{-- grafik Nasabah combine wilayah(tanpa pilih wilayah), kolek, pekerja, tim(pilih wilayah) --}}
+            {{-- grafik Nasabah combine Pendidikan(tanpa pilih Pendidikan), kolek, pekerja, tim(pilih Pendidikan) --}}
             <div class="bg-gray-900 my-2 md:my-4 lg:my-6 px-6 py-3 rounded-md shadow">
                 <div class="mb-4 pb-1 flex">
                     <div class="w-screen flex items-center">
-                        <h4 class="text-base font-thin text-gray-400">Grafik Wilayah
+                        <h4 class="text-base font-thin text-gray-400">Grafik Pendidikan
                             {{ $opsRange == 'bulan' ? $pickYears : '' }}</h4>
                     </div>
                     <div class="w-full justify-end flex items-center cursor-pointer" wire:click="showChartModal">
@@ -85,12 +85,12 @@
         {{-- grafik sisi kanan --}}
         <div class="ml-1 md:ml-2 lg:ml-3 w-2/6">
             {{-- pie grafik kolektibilitas --}}
-            <div wire:ignore class="my-2 md:my-4 lg:my-6 py-3 px-6 text-sm bg-gray-900 shadow rounded-md">
+            <div class="my-2 md:my-4 lg:my-6 py-3 px-6 text-sm bg-gray-900 shadow rounded-md">
                 <div class="pb-1">
                     <h4 class="text-base font-thin text-gray-400">Presentase
-                        {{ $pickRelationId ? ($opsRange == $rangeList[0] ? 'Pertahun' : 'Perbulan') : 'Wilayah' }}</h4>
+                        {{ $pickRelationId ? ($opsRange == $rangeList[0] ? 'Pertahun' : 'Perbulan') : 'Pendidikan' }}</h4>
                 </div>
-                <div class="w-full" wire:key="{{ $chartPie['id'] }}">
+                <div wire:ignore class="w-full" wire:key="{{ $chartPie['id'] }}">
                     @include('addons.charts.pie',['id'=>$chartPie['id'],'chart'=>$chartPie['chart']])
 
                 </div>
@@ -101,7 +101,7 @@
     {{-- Modal chart Form --}}
     <x-jet-dialog-modal wire:key="modelChar" wire:model="modalChartFormVisible">
         <x-slot name="title">
-            {{ __('Pengaturan Grafik Wilayah') }}
+            {{ __('Pengaturan Grafik Pendidikan') }}
         </x-slot>
 
         <x-slot name="content">

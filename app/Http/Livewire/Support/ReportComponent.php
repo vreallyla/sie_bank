@@ -31,7 +31,7 @@ class ReportComponent extends Component
      *
      * @return void
      */
-    private function queryDataAll()
+    protected function queryDataAll()
     {
         $isYears = $this->opsRange == OP_RANGE[0];
         $pickYears = $this->pickYears;
@@ -66,10 +66,11 @@ class ReportComponent extends Component
             })
             ->unionAll($subUnion)
             ->orderByRaw('id,sub_id')
-            ->get()
+            // ->get()
             ;
+            // dd($query->toSql());
 
-        return $query;
+        return $query->get();
     }
     
     /**
@@ -77,7 +78,7 @@ class ReportComponent extends Component
      *
      * @return void
      */
-    private function queryDataByRegions()
+    protected function queryDataByRegions()
     {
         $isYears = $this->opsRange == OP_RANGE[0];
         $pickYears = $this->pickYears;
@@ -154,7 +155,7 @@ class ReportComponent extends Component
                 'label' => "$label",
             ];
             $key[] = $q[0]->sub_id;
-            $i++;
+            $i=$i<24?$i+1:0;
         }
 
 
@@ -240,11 +241,13 @@ class ReportComponent extends Component
         $this->changeChart=true;
         
     }
-
-
     
-
-    public function render()
+    /**
+     * getParams
+     *
+     * @return array
+     */
+    private function getParams()
     {
         $yearList = $this->getYearAvailable();
         $monthList = $this->getMonthAvailable()->get();
@@ -265,14 +268,31 @@ class ReportComponent extends Component
             $this->changeChart=false;
         }
 
-
-
-        return view($this->views(), [
+        $params=[
             'yearList' => $yearList->get(),
             'monthList' => $monthList,
             'relationData' => $relationData,
             'rangeList' => OP_RANGE,
-        ])
+        ];
+
+        return array_replace($params,$this->paramsOther());
+    }
+
+    public function paramsOther()
+    {
+        return [];
+    }
+
+
+    
+
+    public function render()
+    {
+        
+
+
+
+        return view($this->views(),$this->getParams() )
             ->layout(
                 'layouts.head'
             );

@@ -3,6 +3,7 @@
 use App\Charts\NasabahChart;
 use App\Exports\KolektibilitasExport;
 use App\Http\Livewire\Dashboard;
+use App\Http\Livewire\Laporan\KinerjaPemasaran;
 use App\Http\Livewire\Laporan\KolektabilitasNasabah;
 use App\Http\Livewire\Laporan\Nasabah as LaporanNasabah;
 use App\Http\Livewire\Laporan\PemakaianProduk;
@@ -93,6 +94,6 @@ Route::prefix('laporan')->name('laporan.')->group( function () {
     Route::get('penghasilan_nasabah', PenghasilanNasabah::class)->name('penghasilan_nasabah');
     Route::get('profesi_nasabah', ProfesiNasabah::class)->name('profesi_nasabah');
     Route::get('pemakaian_produk', PemakaianProduk::class)->name('pemakaian_produk');
-    Route::get('kinerja_pemasaran', PemakaianProduk::class)->name('kinerja_pemasaran');
+    Route::get('kinerja_pemasaran', KinerjaPemasaran::class)->name('kinerja_pemasaran');
 
 });

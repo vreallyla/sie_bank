@@ -10,29 +10,25 @@
     dataSlug= JSON.parse(dataSlug);
     @endif
 
+    
+    
 
 
     const ctx{{ $id }} = document.getElementById("{{ $id }}").getContext("2d");
     window.{!! $id !!} = new Chart(ctx{{ $id }}, {
         type: 'bar',
-        // plugins: {
-        //     datalabels: {
-        //         display: true,
-        //         align: 'center',
-        //         anchor: 'center',
-        //         formatter: function(value, index, values) {
-        //             if (value > 0) {
-        //                 value = value.toString();
-        //                 value = value.split(/(?=(?:...)*$)/);
-        //                 value = value.join(',');
-        //                 return value;
-        //             } else {
-        //                 value = "";
-        //                 return value;
-        //             }
-        //         }
-        //     }
-        // },
+        borderWidth : 0,
+        plugins: {
+            labels: {
+                  render: function (args) {
+                            if (args.value != 0)
+                                return args.value;
+                        },
+                  fontSize: 10
+
+                    }
+          
+        },
 
         data: {
             labels: {!! json_encode($chart->labels) !!},
@@ -48,6 +44,7 @@
                 }
             },
             @endif
+           
             responsive: true,
             // barRoundness: 1,
             title: {
@@ -63,6 +60,8 @@
                 yAxes: [{
                     ticks: {
                         fontColor: "#9CA3AF",
+                        // min: 1, // Change this
+
                     },
                     gridLines: {
                         display: true,
@@ -75,6 +74,7 @@
                 xAxes: [{
                     ticks: {
                         fontColor: "#9CA3AF",
+                        // min: 1, // Change this
                     },
                     gridLines: {
                         display: true,
