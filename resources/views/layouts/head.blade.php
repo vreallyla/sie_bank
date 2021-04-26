@@ -73,7 +73,7 @@
                             <span class="flex items-center">Dasboard</span>
                         </li>
                     </a>
-
+                    @if (auth()->user()->level == "admin")
                     <li class="flex-col">
                         <div @click="showSub = showSub=='master'?'':'master'" :class="showSub === 'master' ? 'active' : ''"
                             class="menu with-sub flex gap-2">
@@ -144,7 +144,8 @@
                             </a>
                         </ul>
                     </li>
-
+                    @endif
+                    @if (auth()->user()->level == "eksekutif")
                     <li class="flex-col">
                         <div @click="showSub = showSub=='laporan' ?'':'laporan'" :class="showSub === 'laporan' ? 'active' : ''"
                             class="menu with-sub flex gap-2">
@@ -202,7 +203,7 @@
 
                         </ul>
                     </li>
-
+                    @endif
 
 
                 </ul>
@@ -253,7 +254,7 @@
         });
 
     </script>
-    
+
 </body>
 
 </html>

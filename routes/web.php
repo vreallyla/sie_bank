@@ -26,13 +26,14 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
-    return view('welcome');
+//    return view('welcome');
+    return Redirect::to('dashboard');
 });
 
 Route::get('master/chart', WanSpeedTests::class);
 
 Route::get('/test', function () {
-    
+
 
     $labels=['1','2','3','4','5','6','7'];
     $datasets=new Collection([
@@ -61,15 +62,16 @@ Route::get('/test', function () {
 
 
 
-    
+
 });
 
 
 // Route::middleware(['auth:sanctum', 'verified'])->get('/dashboard', function () {
 //     return view('dashboard');
 // })->name('dashboard');
-
-Route::get('dashboard', Dashboard::class)->name('dashboard');
+Route::group(['middleware' => ['auth','hakakses:admin,eksekutif']], function () {
+    Route::get('dashboard', Dashboard::class)->name('dashboard');
+});
 
 
 //page master timpa sini
